@@ -7,7 +7,7 @@ import os
 class LSTM:
     
     def __init__(self, input_size=1, output_size=1, lstm_size=128, num_layers=1,
-                 num_steps=None, keep_prob=0.8, batch_size=64, init_learning_rate=0.5,
+                 num_steps= None, keep_prob=0.8, batch_size=64, init_learning_rate=0.5,
                  learning_rate_decay=0.99, init_epoch=5, max_epoch=100, MODEL_DIR = None, name = 'LSTM_default'):
         self.input_size = input_size 
         self.output_size = output_size
@@ -51,6 +51,13 @@ class LSTM:
             def trapezoidal_integral_approx(t, y):
                 return math_ops.reduce_sum(math_ops.multiply(t[1:] - t[:-1],
                                   (y[:-1] + y[1:]) / 2.), name='integral')
+                
+            """ Define sequence length """
+            def length(sequence):
+                  used = tf.sign(tf.reduce_max(tf.abs(sequence), 2))
+                  length = tf.reduce_sum(used, 1)
+                  length = tf.cast(length, tf.int32)
+                  return length
             
             """ Create one LSTM cell with or without dropout """
             def _create_one_cell():
@@ -65,8 +72,9 @@ class LSTM:
                 
             learning_rate = tf.placeholder(tf.float32, None, name="learning_rate")
     
-            inputs = tf.placeholder(tf.float32, [None, self.num_steps, self.input_size], name="inputs")
+            inputs = tf.placeholder(tf.float32, [None,None, self.input_size], name="inputs")
             targets = tf.placeholder(tf.float32, [None, self.num_steps, self.output_size], name="targets")
+            targets = tf.squeeze(targets)
             time = tf.placeholder(tf.float32, shape = None, name = 'time')
             
             """ Define number of examples """
@@ -77,28 +85,35 @@ class LSTM:
                 [_create_one_cell() for _ in range(self.num_layers)],
                 state_is_tuple=True
             ) if self.num_layers > 1 else _create_one_cell()
-    
-            val, _ = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32, scope="rnn")
+            
+            seq_len = length(inputs)
+            val, _ = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32, sequence_length=seq_len, scope="rnn")
     
             # val.get_shape() = (batch_size, num_steps, lstm_size)
     
             """ Define output layer """
             with tf.name_scope("output_layer"):
                 weight = tf.Variable(tf.random_normal([self.lstm_size, self.output_size]), name="weights")
+                self.weight = weight
                 weight_repeated = tf.tile(tf.expand_dims(weight, 0), [num_examples, 1, 1])
                 bias = tf.Variable(tf.constant(0.1, shape=[self.output_size]), name="biases")
-                prediction = tf.squeeze(tf.matmul(val, weight_repeated) + bias, name="prediction")
+                prediction = tf.squeeze(tf.math.exp(tf.add(tf.matmul(val, weight_repeated),bias)), name="prediction")
                 outputs_train = tf.multiply(prediction, targets, name='outputs_train')
-    
+                nonzero_indices = tf.where(tf.not_equal(outputs_train, tf.zeros_like(outputs_train)))
+                outputs_train_nonzero =  tf.gather_nd(outputs_train,nonzero_indices, name='outputs_train_nonzero')
+                
                 tf.summary.histogram("prediction", prediction)
                 tf.summary.histogram("weights", weight)
                 tf.summary.histogram("biases", bias)
     
             """ Define train scope """
             with tf.name_scope("train"):
-                loss = tf.reduce_sum(-tf.reduce_sum(tf.math.log(outputs_train)) 
-                        + trapezoidal_integral_approx(time, prediction), name="loss_mse")
-                optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+                integral = trapezoidal_integral_approx(time, prediction)
+                
+                outputs_sum_neg = tf.math.negative(tf.reduce_sum(tf.math.log(outputs_train_nonzero)))
+
+                loss = tf.reduce_sum(tf.add(outputs_sum_neg,integral), name="loss_mse")
+                optimizer = tf.train.AdamOptimizer(learning_rate)
                 minimize = optimizer.minimize(loss, name="loss_mse_adam_minimize")
                 
                 tf.summary.scalar("loss_mse", loss)
@@ -149,6 +164,7 @@ class LSTM:
 
             for epoch_step in range(self.max_epoch):
                 current_lr = learning_rates_to_use[epoch_step]
+                
                 if train_X.shape[0]>1:
                     for batch_X, batch_y in list(batches(train_X, train_Targets, self.batch_size)):
                         train_data_feed = {
@@ -164,14 +180,14 @@ class LSTM:
                             time: interval,
                             learning_rate: current_lr}
                     train_loss, _ = sess.run([loss, minimize], train_data_feed)
-    
-                if epoch_step % 1 == 0:
-                    _summary = sess.run([merged_summary], train_data_feed)
-                    print("Epoch %d [%f]:" % (epoch_step, current_lr), train_loss)
+                
+                _summary = sess.run(merged_summary, train_data_feed)
+                print("Epoch %d [%f]:" % (epoch_step, current_lr), train_loss)
     
                 writer.add_summary(_summary, global_step=epoch_step)
     
             graph_saver_dir = os.path.join(self.MODEL_DIR, self.graph_name)
+            
             if not os.path.exists(graph_saver_dir):
                 os.mkdir(graph_saver_dir)
     
@@ -182,7 +198,7 @@ class LSTM:
   
           
     """ PREDICT """         
-    def prediction_by_trained_graph(self, max_epoch, test_X, test_y):
+    def prediction_by_trained_graph(self, max_epoch, test_X):
         test_prediction = None
     
         with tf.Session() as sess:
