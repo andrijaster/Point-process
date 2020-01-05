@@ -1,0 +1,2 @@
+model_checkpoint_path: "C:\\Users\\Andri\\Documents\\GitHub\\Point-process\\LSTM_problem\\graph_1_lr0.10_lr_decay0.999_lstm32_step100_input11_batch1_epoch1000_kp1.000_layer3\\LSTM_model_graph_1.ckpt-999"
+all_model_checkpoint_paths: "C:\\Users\\Andri\\Documents\\GitHub\\Point-process\\LSTM_problem\\graph_1_lr0.10_lr_decay0.999_lstm32_step100_input11_batch1_epoch1000_kp1.000_layer3\\LSTM_model_graph_1.ckpt-999"
