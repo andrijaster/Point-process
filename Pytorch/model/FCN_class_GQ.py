@@ -44,39 +44,45 @@ class FCN_point_process():
             out = torch.exp(self.fc(x[0]))                    
             return out
         
-    def fit(self, x_train, time, targets, no_epoch = 100, log = 1, log_epoch = 5, 
+    def fit(self, x_train, time, no_epoch = 100, log = 1, log_epoch = 5, 
             mini_batch_size =1):
+        
+        def Gaussian_quadrature(vec, lower_l, upper_l):
+            vec = vec.data.numpy().reshape(-1)
+            upper_l = upper_l.data.numpy()
+            m = (upper_l-lower_l)/2
+            c = (upper_l+lower_l)/2
+            vec = (vec-c)/m
+            A = np.array([vec**i for i in range(0,vec.shape[0])])
+            B = np.array([(1**i-(-1)**i)/i for i in range(1,vec.shape[0]+1)])
+            x = m*np.linalg.solve(A, B)
+            return x
+        
         " Training "
         self.model.train()
         
         list_1 = list(self.model.parameters())
         optimizer_1 = torch.optim.Adam(list_1, lr = 0.001)
         
-        def trapezoidal_integral_approx(t, y):
-            return torch.sum(torch.mul(t[1:] - t[:-1],
-                              (y[:-1] + y[1:]) / 2))
-        
-        def loss(time, targets, lam):
-            y = lam*targets
-            column = torch.nonzero(y)
-            y = y[column[:,0]]
-            ML = torch.sum(torch.log(y)) - trapezoidal_integral_approx(time, lam)
+        def loss(lam, weights):
+            ML = torch.sum(torch.log(lam)) - torch.sum(weights*lam)
             return torch.neg(ML)
+        
+        weights = Gaussian_quadrature(time, lower_l = 0, upper_l = time[-1])
+        weights = torch.tensor(weights)
         
         for e in range(no_epoch):
             for i in range(0, x_train.shape[0], mini_batch_size):     
-                batch_x, batch_targets = (x_train[i:i+mini_batch_size], targets[i:i+mini_batch_size])
-                batch_targets = torch.transpose(batch_targets,0,1)
+                batch_x = x_train[i:i+mini_batch_size]
                 lambda_par = self.model(batch_x)
-                loss1 = loss(time, batch_targets, lambda_par)
+                loss1 = loss(lambda_par, weights)
                 optimizer_1.zero_grad()
                 loss1.backward()
                 optimizer_1.step()
         
             if e%log_epoch==0 and log == 1:
                 lambda_tot = self.model(x_train)
-                tar = torch.transpose(targets,0,1)
-                print(loss(time, tar, lambda_tot))
+                print(loss(time, lambda_tot))
                 
                 
     def predict(self, x_test):
@@ -87,21 +93,19 @@ class FCN_point_process():
 
 if __name__ == "__main__":
     
-    time = np.linspace(1,100,100)
-    choice = np.random.choice(time, size= 30, replace = False)
-    targets = np.isin(time,choice).astype(int)
+    time = 1000*np.random.rand(1000)
+    time.sort()
     in_size = 11
     no_epoch = 5000
     out_size = 1
     num_unroll = len(time)
-    x = np. random.randn(1,len(time),in_size-1)
+    x = np.random.randn(1,len(time),in_size-1)
     x_train = np.insert(x, 10, values = time, axis =2)
     
     
     x_train = torch.tensor(x_train).type('torch.FloatTensor')
     time = torch.tensor(time).type('torch.FloatTensor').reshape(-1,1)
-    targets = torch.tensor(targets).type('torch.FloatTensor').reshape(1,-1)
     
     mod = FCN_point_process(in_size, out_size, drop = 0.0)
-    mod.fit(x_train,time,targets, no_epoch = no_epoch)
+    mod.fit(x_train, time, no_epoch = no_epoch)
     print(mod.predict(x_train))
