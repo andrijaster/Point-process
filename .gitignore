@@ -4,3 +4,7 @@ data/
 *.csv
 *.pyc
 env/
+ipython.html
+.DS_Store
+
+!data/results/*

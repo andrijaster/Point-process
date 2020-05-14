@@ -16,9 +16,9 @@ import torch
 #one_location_df[['VendorID', 'PULocationID']].groupby(['PULocationID']).agg(['count'])
 
 
-def get_arr_of_times_ms_based_on_query(df, condition, time_col):
+def get_arr_of_times_ms_based_on_query(input_df, condition, time_col):
     
-    one_location_series = df.query(condition)[[time_col]]
+    one_location_series = input_df.query(condition)[[time_col]]
     one_location_series = one_location_series.astype('str') 
     one_location_series = pd.to_datetime( \
             one_location_series.stack(),  \
@@ -33,10 +33,10 @@ def get_arr_of_times_ms_based_on_query(df, condition, time_col):
     return arr_of_times_from_zero
 
 
-def create_train_space_and_targets(event_times, delta_seconds):
+def create_train_space_and_targets(event_times, delta_seconds, time_step):
     min_ts, max_ts = event_times.min(), event_times.max()
-    train_space = np.arange(min_ts-DELTA_SECONDS, max_ts+DELTA_SECONDS, 1)
-    print('Training: The event happens every apx.' + str(train_space.shape[0] / event_times.shape[0]) + ' seconds.') 
+    train_space = np.arange(min_ts-delta_seconds, max_ts+delta_seconds, time_step)
+    print('Training: The event happens every apx. ' + str(train_space.shape[0] / event_times.shape[0]) + ' time step.') 
     
     train_targets = np.isin(train_space,event_times).astype(int)
     
@@ -48,8 +48,8 @@ def create_dataframe(X, y):
     df.columns = ['num', 'time', 'target']
     return df
 
-def generate_times_since_and_between_last_n(row, n=5):
-    prior = df.loc[:(row.num-1), :]
+def generate_times_since_and_between_last_n(full_df, row, n=5):
+    prior = full_df.loc[:(row.num-1), :]
     happen = prior.query('target == 1').reset_index(drop=True).iloc[-(n+1):,:].reset_index(drop=True)
     if happen.shape[0] < n:
         for i in range(1,n+1):
@@ -57,16 +57,15 @@ def generate_times_since_and_between_last_n(row, n=5):
             row['between_'+str(i)] = np.nan
     else:
        for i in range(1,n+1):
-           row['time_since_'+str(i)] = row.time - happen.iloc[-i,1]
+           row['time_since_'+str(i)] = row.num - happen.iloc[-i,1]
            if(i==1):
-               row['between_'+str(i)] = row.time - happen.iloc[-i,1]
+               row['between_'+str(i)] = row.num - happen.iloc[-i,1]
            else:
                row['between_'+str(i)] = happen.iloc[-i+1,1] - happen.iloc[-i,1]
     return row
 
-def create_feature_matrix(base_df): 
-    n_last = 15
-    tmp_df = base_df.apply(lambda row: generate_times_since_and_between_last_n(row, n_last), axis=1)
+def create_feature_matrix(base_df, n_last=5): 
+    tmp_df = base_df.apply(lambda row: generate_times_since_and_between_last_n(base_df, row, n_last), axis=1)
     fm = tmp_df.loc[~tmp_df['time_since_1'].isna(),:].reset_index(drop=True)
     return fm
 

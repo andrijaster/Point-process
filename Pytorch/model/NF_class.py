@@ -160,7 +160,7 @@ class NF_point_process():
 
 if __name__ == "__main__":
     
-    time = np.linspace(0,100,10 0)
+    time = np.linspace(0,100,10)
     choice = np.random.choice(time, size= 30, replace = False)
     targets = np.isin(time,choice).astype(int)
     in_size = 11
