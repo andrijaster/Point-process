@@ -56,12 +56,12 @@ def perform_ny_exp_test():
     real_zero_extends = np.full((len(predicted_in_test_period) - len(ny_test_times)), 0)
     test_df = pd.DataFrame({'real': np.append(np.around(ny_test_times), real_zero_extends, 0),
                             'predict': np.around(predicted_in_test_period)}, columns=['real', 'predict'])
-    test_df.to_csv('../data/results/ny_obtained_times.csv', index=False)
+    test_df.to_csv('../results/ny_obtained_times.csv', index=False)
 
     # evaluation_df = pd.DataFrame(columns=['name', 'dataset', "score_on_train",  "score_on_test"])
-    evaluation_df = pd.read_csv('../data/results/baseline_scores.csv')
+    evaluation_df = pd.read_csv('../results/baseline_scores.csv')
     evaluation_df.loc[len(evaluation_df)] = ['HawkesExpKern', 'ny_taxi', model.score(), model.score([[ny_test_times]])]
-    evaluation_df.to_csv('../data/results/baseline_scores.csv', index=False)
+    evaluation_df.to_csv('../results/baseline_scores.csv', index=False)
 
 
 def perform_autoput_exp_test():
@@ -85,12 +85,12 @@ def perform_autoput_exp_test():
     real_zero_extends = np.full((len(predicted_in_test_period) - len(auto_test_times)), 0)
     test_df = pd.DataFrame({'real': np.append(np.around(auto_test_times), real_zero_extends, 0),
                             'predict': np.around(predicted_in_test_period)}, columns=['real', 'predict'])
-    test_df.to_csv('../data/results/autoput_obtained_times.csv', index=False)
+    test_df.to_csv('../results/autoput_obtained_times.csv', index=False)
 
     # evaulation_df = pd.DataFrame(columns=['name', 'dataset', "score_on_train"])
-    evaluation_df = pd.read_csv('../data/results/baseline_scores.csv')
+    evaluation_df = pd.read_csv('../results/baseline_scores.csv')
     evaluation_df.loc[len(evaluation_df)] = ['HawkesExpKern', 'autoput', model.score(), model.score([[auto_test_times]])]
-    evaluation_df.to_csv('../data/results/baseline_scores.csv', index=False)
+    evaluation_df.to_csv('../results/baseline_scores.csv', index=False)
 
 
 def perform_finance_exp_test():
@@ -112,12 +112,12 @@ def perform_finance_exp_test():
     real_zero_extends = np.full((len(predicted_in_test_period) - len(finance_test_times)), 0)
     test_df = pd.DataFrame({'real': np.append(np.around(finance_test_times), real_zero_extends, 0),
                             'predict': np.around(predicted_in_test_period)}, columns=['real', 'predict'])
-    test_df.to_csv('../data/results/finance_obtained_times.csv', index=False)
+    test_df.to_csv('../results/finance_obtained_times.csv', index=False)
 
     # evaulation_df = pd.DataFrame(columns=['name', 'dataset', "score_on_train"])
-    evaluation_df = pd.read_csv('../data/results/baseline_scores.csv')
+    evaluation_df = pd.read_csv('../results/baseline_scores.csv')
     evaluation_df.loc[len(evaluation_df)] = ['HawkesExpKern', 'finance', model.score(), model.score([[finance_test_times]])]
-    evaluation_df.to_csv('../data/results/baseline_scores.csv', index=False)
+    evaluation_df.to_csv('../results/baseline_scores.csv', index=False)
 
 
 if __name__ == '__main__':
