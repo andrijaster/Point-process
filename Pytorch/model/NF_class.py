@@ -160,11 +160,11 @@ class NF_point_process():
 
 if __name__ == "__main__":
     
-    time = np.linspace(0,100,10)
+    time = np.linspace(0,100,100)
     choice = np.random.choice(time, size= 30, replace = False)
     targets = np.isin(time,choice).astype(int)
     in_size = 11
-    no_epoch = 1000
+    no_epoch = 10000
     out_size = 1
     num_unroll = len(time)
     x = np. random.randn(1,len(time),in_size-1)
@@ -176,6 +176,6 @@ if __name__ == "__main__":
     time = torch.tensor(time).type('torch.FloatTensor').reshape(-1,1)
     targets = torch.tensor(targets).type('torch.FloatTensor').reshape(1,-1)
     
-    mod = NF_point_process(in_size, out_size, h_dim=6, n_layer=3, drop = 0.1)
+    mod = NF_point_process(in_size, out_size, h_dim=6, n_layer=2, drop = 0.1)
     mod.fit(x_train,time,targets)
     print(mod.predict(x_train))

@@ -61,7 +61,7 @@ if __name__ == "__main__":
     time = torch.tensor(time).type('torch.FloatTensor').reshape(-1,1)
     targets = torch.tensor(targets).type('torch.FloatTensor').reshape(1,-1)
     
-    mod = ml.NF_FCN_point_process(in_size, out_size, num_layers=3 ,drop = 0.1)
+    mod = ml.FCN_point_process(in_size, out_size, num_layers=3 ,drop = 0.1)
     mod.fit(x_train,time,targets, no_epoch = no_epoch)
     sim_model = Simulation(mod, x_train, time)     
     simulation = sim_model.simulate(no_simulation = 100) 

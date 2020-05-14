@@ -102,6 +102,6 @@ if __name__ == "__main__":
     time = torch.tensor(time).type('torch.FloatTensor').reshape(-1,1)
     targets = torch.tensor(targets).type('torch.FloatTensor').reshape(1,-1)
     
-    mod = FCN_point_process(in_size, out_size, drop = 0.1)
+    mod = FCN_point_process(in_size, out_size, drop = 0.0)
     mod.fit(x_train,time,targets, no_epoch = no_epoch)
     print(mod.predict(x_train))
