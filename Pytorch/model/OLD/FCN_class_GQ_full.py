@@ -108,11 +108,11 @@ if __name__ == "__main__":
     time = 100*np.random.rand(100)
     time.sort()
     in_size = 11
-    no_rows = 1
+    no_rows = 10
     no_epoch = 30000
     
-    x = np.random.randn(10,len(time),in_size-1)
-    x = np.insert(x, 10, values = time, axis =2)
+    x = np.random.randn(no_rows,len(time),in_size-1)
+    x = np.insert(x, no_rows, values = time, axis =2)
     idx = random.sample(range(x.shape[1]), 15)
     idx.sort()
     x_train_occurance = x[:,idx,:]
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # time = torch.tensor(time).type('torch.FloatTensor').reshape(-1,1)
     
     mod = FCN_point_process(in_size, drop = 0.0)
-    [time_train_integral, weights] = mod.Gaussian_quadrature(n = 30,lower_l = 0, upper_l = 100)
+    [time_train_integral, weights] = mod.Gaussian_quadrature(n = 50,lower_l = 0, upper_l = 100)
     weights = weights.reshape(-1,1)
     time_train = []
     targets = []
