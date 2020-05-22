@@ -56,6 +56,7 @@ class LSTM_point_process():
             hidden = self.init_hidden(batch_size)
     
             # Passing in the input and hidden state into the model and obtaining outputs
+
             out, hidden = self.rnn(x, hidden)
             
             # Reshaping the outputs such that it can be fit into the fully connected layer
