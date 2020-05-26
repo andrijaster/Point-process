@@ -4,18 +4,64 @@ import torch
 
 
 class Hawkes():
-    def __init__(self, in_size, out_size):
-        self.model = Hawkes.Model(in_size, out_size)
+    def __init__(self):
+        self.model = Hawkes.Model()
+
+    # todo
+    # @staticmethod
+    # def loss(z, integral):
+
+    def get_parameters(self):
+        return self.model.get_parameters()
 
     class Model(torch.nn.Module):
-        def __init__(self, input_size, output_size):
+        def __init__(self):
             super(Hawkes.Model, self).__init__()
-            self.linear = torch.nn.Linear(1, output_size)
+            self.w = torch.randn(1, 1, requires_grad=True)
+            self.b = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
             variable_part = torch.sum(torch.exp(-x)).reshape(1, -1)
-            out = self.linear(variable_part)
+            out = torch.abs(self.w) * variable_part + torch.abs(self.b)
             return out
+
+        def get_parameters(self):
+            return iter((self.w, self.b))
+
+    def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
+        opt = torch.optim.Adam(self.get_parameters(), lr=lr)
+
+        for e in range(epochs):
+            opt.zero_grad()
+            # y_pred = model.model(x)
+            # loss = model.loss(y_pred, y)
+
+            z_, integral_ = Hawkes.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            loss = model.loss(z_, integral_)
+            if e%log_epoch == 0 and log == 1:
+                print(f'Epoch: {e}, loss: {loss}')
+            loss.backward()
+            opt.step()
+
+    def predict(self, time, atribute=None):
+        self.model.eval()
+        time_len = time.size(1)
+        if atribute is None:
+            atribute = torch.ones(in_size).reshape(1, -1)*0
+        z = torch.zeros(time.shape)
+        z0 = self.model(atribute, time[0, 0])
+        z[:,0] = z0
+        for i in range(time_len-1):
+            atribute = atribute + time[0,i+1]
+            z[:,i+1] = self.model(atribute,time[:,i+1])
+            atribute[:,1:] = atribute[:,:-1].clone()
+            atribute[:,0] = 0
+        return z
+
+    def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
+        z_, integral_ = Hawkes.integral(self, time, in_size, no_steps, h = h, method = method)
+        loss1 = Hawkes.loss(z_, integral_)
+        return loss1
 
     @staticmethod
     def loss(z, integral):
@@ -110,7 +156,6 @@ if __name__ == "__main__":
     # ny_train_times = np.array(ny_train_set.query('target == 1').time)
     # train_times = ny_train_times - ny_train_times[0]
     # times = torch.tensor(train_times).type('torch.FloatTensor').reshape(1, -1, 1)
-    # X_input = np.exp(-(train_times - np.concatenate((np.zeros(1), times[:-1]))))
 
     time = np.abs(100*np.random.rand(100))
     time.sort()
@@ -120,20 +165,11 @@ if __name__ == "__main__":
     in_size = 5
     out_size = 1
     learning_rate = 0.001
-    epochs = 100
+    epochs = 500
 
-    model = Hawkes(in_size, out_size)
-    optimizer_1 = torch.optim.Adam(model.model.parameters(), lr=learning_rate)
+    model = Hawkes()
+    model.fit(times, epochs, learning_rate, 10, None, 'Euler', log_epoch=50)
 
-    for epoch in range(epochs):
-        optimizer_1.zero_grad()
-        z_, integral_ = model.integral(time=times, in_size=in_size,
-                                                  no_steps=3, h=None, method="Euler")
-
-        loss = Hawkes.loss(z_, integral_)
-        loss.backward()
-        optimizer_1.step()
-        print('epoch {}, loss {}'.format(epoch, loss.item()))
 
 
 
