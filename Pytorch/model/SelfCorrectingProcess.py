@@ -3,9 +3,9 @@ import pandas as pd
 import torch
 
 
-class Hawkes():
+class SelfCorrectionProcess():
     def __init__(self):
-        self.model = Hawkes.Model()
+        self.model = SelfCorrectionProcess.Model()
 
     # todo
     # @staticmethod
@@ -16,13 +16,12 @@ class Hawkes():
 
     class Model(torch.nn.Module):
         def __init__(self):
-            super(Hawkes.Model, self).__init__()
+            super(SelfCorrectionProcess.Model, self).__init__()
             self.w = torch.randn(1, 1, requires_grad=True)
             self.b = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
-            variable_part = torch.sum(torch.exp(-x)).reshape(1, -1)
-            out = torch.abs(self.w) * variable_part + torch.abs(self.b)
+            out = torch.exp(torch.abs(self.w) * t - torch.abs(self.b)*x.size()[0])
             return out
 
         def get_parameters(self):
@@ -34,7 +33,7 @@ class Hawkes():
         for e in range(epochs):
             opt.zero_grad()
 
-            z_, integral_ = Hawkes.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -42,8 +41,8 @@ class Hawkes():
             opt.step()
 
     def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
-        z_, integral_ = Hawkes.integral(self, time, in_size, no_steps, h = h, method = method)
-        loss1 = Hawkes.loss(z_, integral_)
+        z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps, h = h, method = method)
+        loss1 = SelfCorrectionProcess.loss(z_, integral_)
         return loss1
 
     @staticmethod
@@ -113,7 +112,7 @@ class Hawkes():
                     z0 = self.model(time_to_t0, t)
                     integral += weights[i]*z0
                 atribute = atribute_0 + t1
-                z0 = self.model(time_to_t0, t1)
+                z0 = self.model(time_to_t0 + 1, t1)
 
             return integral, z0, atribute
 
@@ -125,7 +124,7 @@ class Hawkes():
         z0 = self.model(time[0, :0], time[0, 0])
         z[:,0] = z0
         for i in range(time_len-1):
-            integral_interval, z_, atribute = integral_solve(z0, time[0,:i], time[0,i], time[0,i+1], atribute, no_steps = no_steps, h = h, method = method)
+            integral_interval, z_, atribute = integral_solve(z0, time[0, :i], time[0, i], time[0, i+1], atribute, no_steps = no_steps, h = h, method = method)
             integral_ += integral_interval
             atribute[:,1:] = atribute[:,:-1].clone()
             atribute[:,0] = 0
@@ -150,12 +149,13 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epochs = 50
 
-    model = Hawkes()
+    model = SelfCorrectionProcess()
     model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
+    print(f"Loss: {loss_on_train}")
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
-    evaluation_df.loc[len(evaluation_df)] = ['OwnHawkes', 'synthetic', loss_on_train.data.numpy()[0][0], None]
+    evaluation_df.loc[len(evaluation_df)] = ['SelfCorrecting', 'synthetic', loss_on_train.data.numpy()[0][0], None]
     evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
 
 

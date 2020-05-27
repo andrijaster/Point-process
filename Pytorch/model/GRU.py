@@ -5,12 +5,14 @@ Created on Sun Dec 15 18:45:27 2019
 @author: Andri
 """
 
-import torch
-import numpy as np
-from torch import nn, optim
-from scipy.ndimage.interpolation import shift
-from scipy.special import p_roots
 import math
+
+import numpy as np
+import pandas as pd
+import torch
+from scipy.special import p_roots
+from torch import nn
+
 
 class GRU_point_process_all():
 
@@ -223,4 +225,9 @@ if __name__ == "__main__":
 
     mod.fit(time, in_size, no_epoch=50, no_steps = 10, h = None, method = "Trapezoid", log = 1, log_epoch=1)
     print(mod.predict(time))
-    print(mod.evaluate(time, in_size))
+    loss_on_train = mod.evaluate(time, in_size)
+    print(loss_on_train)
+
+    evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
+    evaluation_df.loc[len(evaluation_df)] = ['GRU', 'synthetic', loss_on_train.data.numpy()[0][0], None]
+    evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
