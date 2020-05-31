@@ -3,36 +3,34 @@ import pandas as pd
 import torch
 import math
 
-class Hawkes():
+class HawkesSumGaussians():
     def __init__(self):
-        self.model = Hawkes.Model()
+        self.model = HawkesSumGaussians.Model()
 
     def get_parameters(self):
         return self.model.get_parameters()
 
     class Model(torch.nn.Module):
         def __init__(self):
-            super(Hawkes.Model, self).__init__()
-            self.alpha = torch.randn(1, 1, requires_grad=True)
-            self.mu = torch.randn(1, requires_grad=True)
+            super(HawkesSumGaussians.Model, self).__init__()
+            self.mu = torch.randn(1, 1, requires_grad=True)
+            self.sigma = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
-            variable_part = torch.sum(torch.exp(-x)).reshape(1, -1)
-            out = torch.abs(self.mu) + torch.abs(self.alpha) * variable_part
+            variable_part = torch.sum(torch.exp(-x/(2*self.sigma**2))).reshape(1, -1)
+            out = torch.abs(self.mu) + (2*math.pi*torch.abs(self.sigma)**2)**(-1) * variable_part
             return out
 
         def get_parameters(self):
-            return iter((self.alpha, self.mu))
+            return iter((self.mu, self.sigma))
 
     def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
 
         for e in range(epochs):
             opt.zero_grad()
-            if method == "Analytical":
-                z_, integral_ = Hawkes.integral_analytical(self, time)
-            else:
-                z_, integral_ = Hawkes.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+
+            z_, integral_ = HawkesSumGaussians.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -40,31 +38,14 @@ class Hawkes():
             opt.step()
 
     def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
-        z_, integral_ = Hawkes.integral(self, time, in_size, no_steps, h = h, method = method)
-        loss1 = Hawkes.loss(z_, integral_)
+        z_, integral_ = HawkesSumGaussians.integral(self, time, in_size, no_steps, h = h, method = method)
+        loss1 = HawkesSumGaussians.loss(z_, integral_)
         return loss1
 
     @staticmethod
     def loss(z, integral):
         ML = torch.sum(torch.log(z)) - integral
         return torch.neg(ML)
-
-    def integral_analytical(self, time):
-        def integral_analytical_solve(prior, t):
-            var_integral = torch.sum(torch.exp(prior) * (1 - torch.exp(-t)))
-            integral = self.model.mu*t + self.model.alpha*var_integral
-            z0 = self.model(prior, t)
-            return z0, integral
-
-        time_len = times.size()[1]
-        integral_ = torch.zeros(time.shape)
-        z = torch.zeros(time.shape)
-        for i in range(time_len-1):
-            z_, integral_at_i = integral_analytical_solve(time[0, :i], time[0, i])
-            integral_[:, i+1] = integral_at_i
-            z[:, i+1] = z_
-
-        return z, torch.sum(integral_)
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -128,7 +109,7 @@ class Hawkes():
                     z0 = self.model(time_to_t0, t)
                     integral += weights[i]*z0
                 atribute = atribute_0 + t1
-                z0 = self.model(time_to_t0, t1)
+                z0 = self.model(time_to_t0 + 1, t1)
 
             return integral, z0, atribute
 
@@ -140,7 +121,7 @@ class Hawkes():
         z0 = self.model(time[0, :0], time[0, 0])
         z[:,0] = z0
         for i in range(time_len-1):
-            integral_interval, z_, atribute = integral_solve(z0, time[0,:i], time[0,i], time[0,i+1], atribute, no_steps = no_steps, h = h, method = method)
+            integral_interval, z_, atribute = integral_solve(z0, time[0, :i], time[0, i], time[0, i+1], atribute, no_steps = no_steps, h = h, method = method)
             integral_ += integral_interval
             atribute[:,1:] = atribute[:,:-1].clone()
             atribute[:,0] = 0
@@ -165,13 +146,13 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epochs = 50
 
-    model = Hawkes()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model = HawkesSumGaussians()
+    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
-    print(f"Loss on train: {str(loss_on_train)}")
+    print(f"Loss: {loss_on_train}")
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
-    evaluation_df.loc[len(evaluation_df)] = ['OwnHawkesAnalytical', 'synthetic', loss_on_train.data.numpy()[0][0], None]
+    evaluation_df.loc[len(evaluation_df)] = ['HawkesSumGaussians', 'synthetic', loss_on_train.data.numpy()[0][0], None]
     evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
 
 
