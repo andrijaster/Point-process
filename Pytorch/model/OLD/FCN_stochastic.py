@@ -14,11 +14,17 @@ import math
 
 class FCN_point_process_all():
     
-    def __init__(self, in_size, out_size, drop=0, num_layers = 2,
-                 step = 2):
+    def __init__(self, in_size, out_size, in_size_stoc, out_size_stoch, drop=0, num_layers = 2,
+                 step = 2, drop_stoc=0, num_layers_stoc = 2,
+                 step_stoc = 2):
+        
         self.model = FCN_point_process_all.Model(in_size, out_size, 
                            dropout = drop,
                            num_layers = num_layers, step = step)
+
+        self.model_stoc = FCN_point_process_all.Model(in_size_stoc, out_size_stoch, 
+                           dropout = drop_stoc,
+                           num_layers = num_layers_stoc, step = step_stoc)
 
     @staticmethod
     def loss(z, integral):
@@ -26,69 +32,23 @@ class FCN_point_process_all():
         return torch.neg(ML)
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
-
-
+        
         def integral_solve(z0, t0, t1, atribute_0, no_steps = 10, h = None, method = "Euler"):
             if no_steps is not None:
                 h_max = (t1 - t0)/no_steps
             elif h is not None:
                 no_steps = math.ceil((t1 - t0)/h)
                 h_max = (t1 - t0)/no_steps
-            
+
             integral = 0
             t = t0
-
-            def Gaussian_quadrature(n, lower_l, upper_l):
-                m = (upper_l-lower_l)/2
-                c = (upper_l+lower_l)/2
-                [x,w] = p_roots(n+1)
-                weights = m*w
-                time_train_integral = m*x+c
-                return time_train_integral, weights
-
 
             if method =="Euler": 
                 for _ in range(no_steps):
                     integral += z0*h_max
                     t = t + h_max
                     atribute = atribute_0 + t
-                    z0 = self.model(atribute,t)            
-
-            if method =="Implicit_Euler": 
-                for _ in range(no_steps):
-                    t = t + h_max
-                    atribute = atribute_0 + t
-                    z0 = self.model(atribute,t)
-                    integral += z0*h_max
-
-            if method == "Trapezoid":
-                for _ in range(no_steps):
-                    t = t + h_max
-                    atribute = atribute_0 + t
-                    z1 = self.model(atribute,t)
-                    integral += (z0+z1)*0.5*h_max 
-                    z0 = z1  
-            
-            if method == "Simpsons":
-                z = []
-                z.append(z0)
-                for _ in range(no_steps):
-                    t = t + h_max
-                    atribute = atribute_0 + t
-                    z0 = self.model(atribute,t)
-                    z.append(z0)       
-                integral = h_max/3*sum(z[0:-1:2] + 4*z[1::2] + z[2::2])      
-
-            if method == "Gaussian_Q":
-                time_integral, weights = Gaussian_quadrature(no_steps, t0, t1)
-                integral = 0
-                for i in range(time_integral.shape[0]):
-                    t = time_integral[i]
-                    atribute = atribute_0 + t
-                    z0 = self.model(atribute,t)
-                    integral += weights[i]*z0  
-                atribute = atribute_0 + t1
-                z0 = self.model(atribute,t1)                  
+                    z0 = self.model(atribute,t) + self.model_stoc(atribute,t)                       
 
             return integral, z0, atribute
 

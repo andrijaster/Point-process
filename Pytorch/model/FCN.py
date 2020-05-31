@@ -55,14 +55,14 @@ class FCN_point_process_all():
                     atribute = atribute + h_max
                     z0 = self.model(atribute,t)
 
-            if method =="Implicit_Euler":
+            elif method =="Implicit_Euler":
                 for _ in range(no_steps):
                     t = t + h_max
                     atribute = atribute + h_max
                     z0 = self.model(atribute,t)
                     integral += z0*h_max
 
-            if method == "Trapezoid":
+            elif method == "Trapezoid":
                 for _ in range(no_steps):
                     t = t + h_max
                     atribute = atribute + h_max
@@ -70,7 +70,7 @@ class FCN_point_process_all():
                     integral += (z0+z1)*0.5*h_max
                     z0 = z1
 
-            if method == "Simpsons":
+            elif method == "Simpsons":
                 z = []
                 z.append(z0)
                 for _ in range(no_steps):
@@ -80,7 +80,7 @@ class FCN_point_process_all():
                     z.append(z0)
                 integral = h_max/3*sum(z[0:-1:2] + 4*z[1::2] + z[2::2])
 
-            if method == "Gaussian_Q":
+            elif method == "Gaussian_Q":
                 time_integral, weights = Gaussian_quadrature(no_steps, t0, t1)
                 integral = 0
                 for i in range(time_integral.shape[0]):
@@ -168,6 +168,18 @@ class FCN_point_process_all():
             atribute[:,0] = 0
         return z
 
+    def predict_sim(self, time, atribute):
+        self.model.eval()
+        time_len = time.size(1)
+        z = torch.zeros(time.shape)
+        z0 = self.model(atribute,time[0,0])
+        z[:,0] = z0
+        for i in range(time_len-1):
+            atribute = atribute + time[0,i+1]
+            z[:,i+1] = self.model(atribute,time[:,i+1])
+        return z
+
+
     def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
         z_, integral_ = FCN_point_process_all.integral(self, time, in_size, no_steps, h = h, method = method)
         loss1 = FCN_point_process_all.loss(z_, integral_)
@@ -187,7 +199,7 @@ if __name__ == "__main__":
     time = torch.tensor(time).type('torch.FloatTensor').reshape(1,-1,1)
 
     mod = FCN_point_process_all(in_size+1, out_size, drop = 0.0)
-    mod.fit(time, in_size, no_epoch=50, no_steps = 10, h = None, method = "Trapezoid", log = 1, log_epoch=10)
+    mod.fit(time, in_size, no_epoch=50, no_steps = 10, h = None, method = "Euler", log = 1, log_epoch=10)
     print(mod.predict(time))
     loss_on_train = mod.evaluate(time, in_size)
     print(loss_on_train)
