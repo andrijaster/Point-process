@@ -3,25 +3,26 @@ import pandas as pd
 import torch
 
 
-class SelfCorrectionProcess():
+class PoissonPolynomial():
     def __init__(self):
-        self.model = SelfCorrectionProcess.Model()
+        self.model = PoissonPolynomial.Model()
 
     def get_parameters(self):
         return self.model.get_parameters()
 
     class Model(torch.nn.Module):
         def __init__(self):
-            super(SelfCorrectionProcess.Model, self).__init__()
-            self.mu = torch.randn(1, 1, requires_grad=True)
-            self.alpha = torch.randn(1, requires_grad=True)
+            super(PoissonPolynomial.Model, self).__init__()
+            self.a = torch.randn(1, requires_grad=True)
+            self.b = torch.randn(1, requires_grad=True)
+            self.c = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
-            out = torch.exp(torch.abs(self.mu) * t - torch.abs(self.alpha) * x.size()[0])
+            out = torch.abs(self.a) + torch.abs(self.b)*t + torch.abs(self.c)*t**2
             return out
 
         def get_parameters(self):
-            return iter((self.mu, self.alpha))
+            return iter((self.a, self.b, self.c))
 
     def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
@@ -29,10 +30,7 @@ class SelfCorrectionProcess():
         for e in range(epochs):
             opt.zero_grad()
 
-            if method == "Analytical":
-                z_, integral_ = SelfCorrectionProcess.integral_analytical(self, time)
-            else:
-                z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            z_, integral_ = PoissonPolynomial.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -40,25 +38,14 @@ class SelfCorrectionProcess():
             opt.step()
 
     def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
-        z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps, h = h, method = method)
-        loss1 = SelfCorrectionProcess.loss(z_, integral_)
+        z_, integral_ = PoissonPolynomial.integral(self, time, in_size, no_steps, h = h, method = method)
+        loss1 = PoissonPolynomial.loss(z_, integral_)
         return loss1
 
     @staticmethod
     def loss(z, integral):
         ML = torch.sum(torch.log(z)) - integral
         return torch.neg(ML)
-
-    def integral_analytical(self, time):
-        def integral_analytical_solve(prior, t):
-            n = times[0, :-1].size()[0]
-            if __name__ == '__main__':
-                var_integral = (torch.exp(t) - 1) / self.model.mu * torch.exp(n*self.model.alpha)
-            integral = self.model.mu*t + self.model.alpha*var_integral
-            z0 = self.model(prior, t)
-            return z0, integral
-
-        return integral_analytical_solve(time[0, :-1], time[0, -1])
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -159,13 +146,13 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epochs = 50
 
-    model = SelfCorrectionProcess()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model = PoissonPolynomial()
+    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
-    evaluation_df.loc[len(evaluation_df)] = ['SelfCorrecting', 'synthetic', loss_on_train.data.numpy()[0][0], None]
+    evaluation_df.loc[len(evaluation_df)] = ['PoissonPolynomial', 'synthetic', loss_on_train.data.numpy()[0], None]
     evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
 
 

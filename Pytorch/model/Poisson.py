@@ -13,24 +13,24 @@ class Poisson():
     class Model(torch.nn.Module):
         def __init__(self):
             super(Poisson.Model, self).__init__()
-            self.a = torch.randn(1, requires_grad=True)
-            self.b = torch.randn(1, requires_grad=True)
-            self.c = torch.randn(1, requires_grad=True)
+            self.a = torch.randn(1, requires_grad=True).float()
 
         def forward(self, x, t):
-            out = torch.abs(self.a) + torch.abs(self.b)*t + torch.abs(self.c)*t**2
+            out = torch.abs(self.a)*t+torch.abs(self.b)
             return out
 
         def get_parameters(self):
-            return iter((self.a, self.b, self.c))
+            return iter((self.a, self.b))
 
     def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
 
         for e in range(epochs):
             opt.zero_grad()
-
-            z_, integral_ = Poisson.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            if method == "Analytical":
+                z_, integral_ = Poisson.integral_analytical(self, time)
+            else:
+                z_, integral_ = Poisson.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -46,6 +46,14 @@ class Poisson():
     def loss(z, integral):
         ML = torch.sum(torch.log(z)) - integral
         return torch.neg(ML)
+
+    def integral_analytical(self, time):
+        def integral_analytical_solve(prior, t):
+            integral = self.model.a*t**2 + self.model.b
+            z0 = self.model(prior, t)
+            return z0, integral
+
+        return integral_analytical_solve(time[0, :-1], time[0, -1])
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -147,12 +155,12 @@ if __name__ == "__main__":
     epochs = 50
 
     model = Poisson()
-    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
+    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
-    evaluation_df.loc[len(evaluation_df)] = ['Poisson', 'synthetic', loss_on_train.data.numpy()[0], None]
+    evaluation_df.loc[len(evaluation_df)] = ['PoissonAnalytical', 'synthetic', loss_on_train.data.numpy()[0], None]
     evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
 
 

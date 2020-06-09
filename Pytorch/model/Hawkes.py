@@ -56,15 +56,7 @@ class Hawkes():
             z0 = self.model(prior, t)
             return z0, integral
 
-        time_len = times.size()[1]
-        integral_ = torch.zeros(time.shape)
-        z = torch.zeros(time.shape)
-        for i in range(time_len-1):
-            z_, integral_at_i = integral_analytical_solve(time[0, :i], time[0, i])
-            integral_[:, i+1] = integral_at_i
-            z[:, i+1] = z_
-
-        return z, torch.sum(integral_)
+        return integral_analytical_solve(time[0, :-1], time[0, -1])
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -166,7 +158,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = Hawkes()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss on train: {str(loss_on_train)}")
