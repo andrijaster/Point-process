@@ -13,14 +13,14 @@ class Poisson():
     class Model(torch.nn.Module):
         def __init__(self):
             super(Poisson.Model, self).__init__()
-            self.a = torch.randn(1, requires_grad=True).float()
+            self.b = torch.randn(1, requires_grad=True).float()
 
         def forward(self, x, t):
-            out = torch.abs(self.a)*t+torch.abs(self.b)
+            out = torch.abs(self.b)
             return out
 
         def get_parameters(self):
-            return iter((self.a, self.b))
+            return iter(self.b)
 
     def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
@@ -49,7 +49,7 @@ class Poisson():
 
     def integral_analytical(self, time):
         def integral_analytical_solve(prior, t):
-            integral = self.model.a*t**2 + self.model.b
+            integral = self.model.b*t
             z0 = self.model(prior, t)
             return z0, integral
 
