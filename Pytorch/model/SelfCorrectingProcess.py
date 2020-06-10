@@ -29,10 +29,7 @@ class SelfCorrectionProcess():
         for e in range(epochs):
             opt.zero_grad()
 
-            if method == "Analytical":
-                z_, integral_ = SelfCorrectionProcess.integral_analytical(self, time)
-            else:
-                z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -48,17 +45,6 @@ class SelfCorrectionProcess():
     def loss(z, integral):
         ML = torch.sum(torch.log(z)) - integral
         return torch.neg(ML)
-
-    def integral_analytical(self, time):
-        def integral_analytical_solve(prior, t):
-            n = times[0, :-1].size()[0]
-            if __name__ == '__main__':
-                var_integral = (torch.exp(t) - 1) / self.model.mu * torch.exp(n*self.model.alpha)
-            integral = self.model.mu*t + self.model.alpha*var_integral
-            z0 = self.model(prior, t)
-            return z0, integral
-
-        return integral_analytical_solve(time[0, :-1], time[0, -1])
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -160,7 +146,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = SelfCorrectionProcess()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")

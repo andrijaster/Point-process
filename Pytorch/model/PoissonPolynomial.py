@@ -29,8 +29,10 @@ class PoissonPolynomial():
 
         for e in range(epochs):
             opt.zero_grad()
-
-            z_, integral_ = PoissonPolynomial.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            if method == "Analytical":
+                z_, integral_ = PoissonPolynomial.integral_analytical(self, time)
+            else:
+                z_, integral_ = PoissonPolynomial.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = model.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -46,6 +48,14 @@ class PoissonPolynomial():
     def loss(z, integral):
         ML = torch.sum(torch.log(z)) - integral
         return torch.neg(ML)
+
+    def integral_analytical(self, time):
+        def integral_analytical_solve(prior, t):
+            integral = self.model.a*t + self.model.b*t**2 + (self.model.c*t**3)/2
+            z0 = self.model(prior, t)
+            return z0, integral
+
+        return integral_analytical_solve(time[0, :-1], time[0, -1])
 
     def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
 
@@ -147,7 +157,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = PoissonPolynomial()
-    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
+    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")
