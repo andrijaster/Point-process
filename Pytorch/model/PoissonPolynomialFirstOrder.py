@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
+from scipy.special import p_roots
 
 
 class PoissonPolynomialFirstOrder():
@@ -23,7 +24,7 @@ class PoissonPolynomialFirstOrder():
         def get_parameters(self):
             return iter((self.a, self.b))
 
-    def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
+    def fit(self, time, epochs, lr, in_size, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
 
         for e in range(epochs):
@@ -33,7 +34,7 @@ class PoissonPolynomialFirstOrder():
                 z_, integral_ = PoissonPolynomialFirstOrder.integral_analytical(self, time)
             else:
                 z_, integral_ = PoissonPolynomialFirstOrder.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
-            loss = model.loss(z_, integral_)
+            loss = self.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
             loss.backward()
@@ -118,7 +119,7 @@ class PoissonPolynomialFirstOrder():
                     atribute = atribute + h_max
                     z0 = self.model(time_to_t0, t)
                     integral += weights[i]*z0
-                atribute = atribute_0 + t1
+                atribute = atribute + t1
                 z0 = self.model(time_to_t0 + 1, t1)
 
             return integral, z0, atribute
@@ -157,7 +158,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = PoissonPolynomialFirstOrder()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model.fit(times, epochs, learning_rate, in_size, 10, None, 'Analytical', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")

@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import torch
 import math
+from scipy.special import p_roots
+
 
 class HawkesSumGaussians():
     def __init__(self):
@@ -24,14 +26,14 @@ class HawkesSumGaussians():
         def get_parameters(self):
             return iter((self.mu, self.sigma))
 
-    def fit(self, time, epochs, lr, no_steps, h, method, log_epoch=10, log=1):
+    def fit(self, time, epochs, lr, in_size, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
 
         for e in range(epochs):
             opt.zero_grad()
 
             z_, integral_ = HawkesSumGaussians.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
-            loss = model.loss(z_, integral_)
+            loss = self.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
             loss.backward()
@@ -108,7 +110,7 @@ class HawkesSumGaussians():
                     atribute = atribute + h_max
                     z0 = self.model(time_to_t0, t)
                     integral += weights[i]*z0
-                atribute = atribute_0 + t1
+                atribute = atribute + t1
                 z0 = self.model(time_to_t0 + 1, t1)
 
             return integral, z0, atribute
@@ -147,7 +149,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = HawkesSumGaussians()
-    model.fit(times, epochs, learning_rate, 10, None, 'Trapezoid', log_epoch=10)
+    model.fit(times, epochs, learning_rate, in_size, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")
