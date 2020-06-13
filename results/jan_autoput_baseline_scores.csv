@@ -1,29 +1,24 @@
 model_name,rule,no_step,learning_rate,loss_on_train
-PoissonPolynomial,Euler,10,0.001,561453531136.0
-PoissonPolynomial,Implicit Euler,10,0.001,561453531136.0
-PoissonPolynomial,Trapezoid,10,0.001,543410585600.0
-PoissonPolynomial,Simpsons,10,0.001,525367443456.0
-PoissonPolynomial,Gaussian_Q,10,0.001,507324694528.0
-PoissonPolynomial,Analytical,10,0.001,525367443456.0
-PoissonPolynomialFirstOrder,Euler,10,0.001,11786927.0
-PoissonPolynomialFirstOrder,Implicit Euler,10,0.001,11787473.0
-PoissonPolynomialFirstOrder,Trapezoid,10,0.001,9241908.0
-PoissonPolynomialFirstOrder,Simpsons,10,0.001,6696591.0
-PoissonPolynomialFirstOrder,Gaussian_Q,10,0.001,4151772.5
-PoissonPolynomialFirstOrder,Analytical,10,0.001,6695600.0
-Hawkes,Euler,10,0.001,[13305.365]
-Hawkes,Implicit Euler,10,0.001,[13726.301]
-Hawkes,Trapezoid,10,0.001,[13086.817]
-Hawkes,Simpsons,10,0.001,[12658.8955]
-Hawkes,Gaussian_Q,10,0.001,[12250.376]
-Hawkes,Analytical,10,0.001,[12658.373]
-HawkesSumGaussians,Euler,10,0.001,[13092.386]
-HawkesSumGaussians,Implicit Euler,10,0.001,[13516.413]
-HawkesSumGaussians,Trapezoid,10,0.001,[12916.156]
-HawkesSumGaussians,Simpsons,10,0.001,[12353.593]
-HawkesSumGaussians,Gaussian_Q,10,0.001,[11822.768]
-SelfCorrectionProcess,Euler,10,0.001,[nan]
-SelfCorrectionProcess,Implicit Euler,10,0.001,[nan]
-SelfCorrectionProcess,Trapezoid,10,0.001,[nan]
-SelfCorrectionProcess,Simpsons,10,0.001,[nan]
-SelfCorrectionProcess,Gaussian_Q,10,0.001,[nan]
+PoissonPolynomial,Euler,10,0.001,10339187949568.0
+PoissonPolynomial,Implicit Euler,10,0.001,10339187949568.0
+PoissonPolynomial,Trapezoid,10,0.001,9554900287488.0
+PoissonPolynomial,Simpsons,10,0.001,8770613673984.0
+PoissonPolynomial,Gaussian_Q,10,0.001,7986330206208.0
+PoissonPolynomial,Analytical,10,0.001,8770550235136.0
+PoissonPolynomialFirstOrder,Euler,10,0.001,218143984.0
+PoissonPolynomialFirstOrder,Implicit Euler,10,0.001,218145968.0
+PoissonPolynomialFirstOrder,Trapezoid,10,0.001,186684224.0
+PoissonPolynomialFirstOrder,Simpsons,10,0.001,155222576.0
+PoissonPolynomialFirstOrder,Gaussian_Q,10,0.001,123760512.0
+PoissonPolynomialFirstOrder,Analytical,10,0.001,155222576.0
+Hawkes,Euler,10,0.001,[57141.27]
+Hawkes,Implicit Euler,10,0.001,[58971.434]
+Hawkes,Trapezoid,10,0.001,[55488.902]
+Hawkes,Simpsons,10,0.001,[52010.848]
+Hawkes,Gaussian_Q,10,0.001,[48537.855]
+Hawkes,Analytical,10,0.001,[50361.51]
+HawkesSumGaussians,Euler,10,0.001,[27313.947]
+HawkesSumGaussians,Implicit Euler,10,0.001,[29099.783]
+HawkesSumGaussians,Trapezoid,10,0.001,[26773.549]
+HawkesSumGaussians,Simpsons,10,0.001,[24525.938]
+HawkesSumGaussians,Gaussian_Q,10,0.001,[22345.777]

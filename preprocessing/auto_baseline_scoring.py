@@ -7,13 +7,30 @@ from Pytorch.model.Hawkes import Hawkes
 from Pytorch.model.HawkesSumGaussians import HawkesSumGaussians
 from Pytorch.model.SelfCorrectingProcess import SelfCorrectionProcess
 import torch
-
+import pickle
 
 if __name__ == "__main__":
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    df = pd.read_csv("../data/autoput/012017_bg-nis-stan3-traka1-time_df.csv")
+
+    df1 = pd.read_csv('../data/autoput/012017_bgd-nis_1.csv', sep=';', header=None)
+    df1.drop(labels=[0, 3, 5], axis=1, inplace=True)
+    kolone = {1: 'UlazStan', 2: 'UlazTraka', 4: 'date1', 6: 'IzlazStan',
+              7: 'IzlazTraka', 8: 'date2', 9: 'Kategorija', 10: 'tag'}
+    df1.rename(columns=kolone, inplace = True)
+    DATETIME_COLUMN = 'date1'
+    LOCATION_CONDITION = 'UlazStan == 1 and UlazTraka == 3'
+    OBSERVED_DAY = '2017-01-01'
+    location_result = df1.query(LOCATION_CONDITION)
+
+    # datetime parsing
+    location_result.date1 = pd.to_datetime(location_result.date1)
+    one_day_location = location_result[location_result.date1.dt.strftime("%Y-%m-%d") == OBSERVED_DAY]
+    one_day_location['date1_ts'] = one_day_location.date1.astype('int') / 10**9
+    one_day_location['date1_ts'] = one_day_location['date1_ts'] - one_day_location['date1_ts'].min()
+    one_day_location = one_day_location.sort_values(by='date1_ts')
+    time = torch.tensor(one_day_location.date1_ts.values[:1000]).type('torch.FloatTensor').reshape(1, -1, 1)
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
@@ -27,14 +44,12 @@ if __name__ == "__main__":
         {'model': PoissonPolynomial(), 'learning_param_map': learning_param_map+analytical_definition},
         {'model': PoissonPolynomialFirstOrder(), 'learning_param_map': learning_param_map+analytical_definition},
         {'model': Hawkes(), 'learning_param_map': learning_param_map+analytical_definition},
-        {'model': HawkesSumGaussians(), 'learning_param_map': learning_param_map},
-        {'model': SelfCorrectionProcess(), 'learning_param_map': learning_param_map}
+        {'model': HawkesSumGaussians(), 'learning_param_map': learning_param_map}  # ,
+        # {'model': SelfCorrectionProcess(), 'learning_param_map': learning_param_map}
     ]
 
-    events_df = df.query('target == 1').reset_index()
-    time = torch.tensor(events_df['num'].values[:3000]).type('torch.FloatTensor').reshape(1, -1, 1)
-    print(f'Shape of full df: {str(df.shape[0])}, shape of events: {str(time.shape[1])}. '
-          f'Percentage: {str(time.shape[1]/df.shape[0])}')
+    print(f'Observed location: {LOCATION_CONDITION}, observed day: {OBSERVED_DAY}. '
+          f'Number of events: {str(time.shape[1])}')
 
     in_size = 5
     out_size = 1
@@ -54,6 +69,8 @@ if __name__ == "__main__":
                                                      params['no_step'],
                                                      params['learning_rate'],
                                                      loss_on_train.data.numpy()[0]]
+            model_filepath = f"../models/auto-{OBSERVED_DAY}-{type(model).__name__}-{params['rule']}.torch"
+            pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
     evaluation_df.to_csv('../results/jan_autoput_baseline_scores.csv', index=False)
