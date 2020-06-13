@@ -5,7 +5,7 @@ from Pytorch.model.PoissonPolynomial import PoissonPolynomial
 from Pytorch.model.PoissonPolynomialFirstOrder import PoissonPolynomialFirstOrder
 from Pytorch.model.Hawkes import Hawkes
 from Pytorch.model.HawkesSumGaussians import HawkesSumGaussians
-from Pytorch.model.SelfCorrectingProcess import SelfCorrectionProcess
+from Pytorch.model.SelfCorrectingProcess import SelfCorrectingProcess
 import torch
 import pickle
 
@@ -41,11 +41,12 @@ if __name__ == "__main__":
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 10, 'learning_rate': 0.001}]
     models_to_evaluate = [
-        {'model': PoissonPolynomial(), 'learning_param_map': learning_param_map+analytical_definition},
-        {'model': PoissonPolynomialFirstOrder(), 'learning_param_map': learning_param_map+analytical_definition},
-        {'model': Hawkes(), 'learning_param_map': learning_param_map+analytical_definition},
-        {'model': HawkesSumGaussians(), 'learning_param_map': learning_param_map}  # ,
-        # {'model': SelfCorrectionProcess(), 'learning_param_map': learning_param_map}
+        # {'model': Poisson(), 'learning_param_map': learning_param_map+analytical_definition}
+        # {'model': PoissonPolynomial(), 'learning_param_map': learning_param_map+analytical_definition},
+        # {'model': PoissonPolynomialFirstOrder(), 'learning_param_map': learning_param_map+analytical_definition},
+        # {'model': Hawkes(), 'learning_param_map': learning_param_map+analytical_definition},
+        # {'model': HawkesSumGaussians(), 'learning_param_map': learning_param_map}  # ,
+        {'model': SelfCorrectingProcess(), 'learning_param_map': learning_param_map}
     ]
 
     print(f'Observed location: {LOCATION_CONDITION}, observed day: {OBSERVED_DAY}. '
@@ -56,6 +57,8 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epochs = 50
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train'])
+    evaluation_df = pd.read_csv('../results/jan_autoput_baseline_scores.csv')
+
     for model_definition in models_to_evaluate:
         for params in model_definition['learning_param_map']:
             model = model_definition['model']
@@ -73,7 +76,7 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('../results/jan_autoput_baseline_scores.csv', index=False)
+    # evaluation_df.to_csv('../results/jan_autoput_baseline_scores.csv', index=False)
 
 
 

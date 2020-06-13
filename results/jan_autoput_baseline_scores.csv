@@ -22,3 +22,9 @@ HawkesSumGaussians,Implicit Euler,10,0.001,[29099.783]
 HawkesSumGaussians,Trapezoid,10,0.001,[26773.549]
 HawkesSumGaussians,Simpsons,10,0.001,[24525.938]
 HawkesSumGaussians,Gaussian_Q,10,0.001,[22345.777]
+Poisson,Euler,10,0.001,4642.4873046875
+Poisson,Implicit Euler,10,0.001,5434.92724609375
+Poisson,Trapezoid,10,0.001,4637.94384765625
+Poisson,Simpsons,10,0.001,4621.50390625
+Poisson,Gaussian_Q,10,0.001,4621.48486328125
+Poisson,Analytical,10,0.001,4630.365234375

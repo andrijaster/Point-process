@@ -1,28 +1,27 @@
 import numpy as np
 import pandas as pd
 import torch
-from scipy.special import p_roots
 
 
-class SelfCorrectionProcess():
+class SelfCorrectingProcess():
     def __init__(self):
-        self.model = SelfCorrectionProcess.Model()
+        self.model = SelfCorrectingProcess.Model()
 
     def get_parameters(self):
         return self.model.get_parameters()
 
     class Model(torch.nn.Module):
         def __init__(self):
-            super(SelfCorrectionProcess.Model, self).__init__()
-            self.mu = torch.randn(1, 1, requires_grad=True)
-            self.alpha = torch.randn(1, requires_grad=True)
+            super(SelfCorrectingProcess.Model, self).__init__()
+            self.w = torch.randn(1, 1, requires_grad=True)
+            self.b = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
-            out = torch.exp(torch.abs(self.mu) * t - torch.abs(self.alpha) * x.size()[0])
+            out = torch.exp(torch.abs(self.w) * t - torch.abs(self.b)*x.size()[0])
             return out
 
         def get_parameters(self):
-            return iter((self.mu, self.alpha))
+            return iter((self.w, self.b))
 
     def fit(self, time, epochs, lr, in_size, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
@@ -30,7 +29,7 @@ class SelfCorrectionProcess():
         for e in range(epochs):
             opt.zero_grad()
 
-            z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
+            z_, integral_ = SelfCorrectingProcess.integral(self, time, in_size, no_steps=no_steps, h=h, method=method)
             loss = self.loss(z_, integral_)
             if e%log_epoch == 0 and log == 1:
                 print(f'Epoch: {e}, loss: {loss}')
@@ -38,8 +37,8 @@ class SelfCorrectionProcess():
             opt.step()
 
     def evaluate(self, time, in_size, no_steps = 10, h = None, atribute = None, method = "Euler"):
-        z_, integral_ = SelfCorrectionProcess.integral(self, time, in_size, no_steps, h = h, method = method)
-        loss1 = SelfCorrectionProcess.loss(z_, integral_)
+        z_, integral_ = SelfCorrectingProcess.integral(self, time, in_size, no_steps, h = h, method = method)
+        loss1 = SelfCorrectingProcess.loss(z_, integral_)
         return loss1
 
     @staticmethod
@@ -109,7 +108,7 @@ class SelfCorrectionProcess():
                     z0 = self.model(time_to_t0, t)
                     integral += weights[i]*z0
                 atribute = atribute + t1
-                z0 = self.model(time_to_t0 + 1, t1)
+                z0 = self.model(time_to_t0, t1)
 
             return integral, z0, atribute
 
@@ -121,7 +120,7 @@ class SelfCorrectionProcess():
         z0 = self.model(time[0, :0], time[0, 0])
         z[:,0] = z0
         for i in range(time_len-1):
-            integral_interval, z_, atribute = integral_solve(z0, time[0, :i], time[0, i], time[0, i+1], atribute, no_steps = no_steps, h = h, method = method)
+            integral_interval, z_, atribute = integral_solve(z0, time[0,:i], time[0,i], time[0,i+1], atribute, no_steps = no_steps, h = h, method = method)
             integral_ += integral_interval
             atribute[:,1:] = atribute[:,:-1].clone()
             atribute[:,0] = 0
@@ -146,7 +145,7 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epochs = 50
 
-    model = SelfCorrectionProcess()
+    model = SelfCorrectingProcess()
     model.fit(times, epochs, learning_rate, in_size, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
@@ -154,5 +153,4 @@ if __name__ == "__main__":
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
     evaluation_df.loc[len(evaluation_df)] = ['SelfCorrecting', 'synthetic', loss_on_train.data.numpy()[0][0], None]
     evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
-
 

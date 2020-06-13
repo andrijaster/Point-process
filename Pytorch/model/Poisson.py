@@ -14,14 +14,15 @@ class Poisson():
     class Model(torch.nn.Module):
         def __init__(self):
             super(Poisson.Model, self).__init__()
-            self.b = torch.randn(1, requires_grad=True).float()
+            self.a = torch.randn(1, 1, requires_grad=True)
+            self.b = torch.randn(1, requires_grad=True)
 
         def forward(self, x, t):
             out = torch.abs(self.b)
             return out
 
         def get_parameters(self):
-            return iter(self.b)
+            return iter((self.a, self.b))
 
     def fit(self, time, epochs, lr, in_size, no_steps, h, method, log_epoch=10, log=1):
         opt = torch.optim.Adam(self.get_parameters(), lr=lr)
@@ -156,7 +157,7 @@ if __name__ == "__main__":
     epochs = 50
 
     model = Poisson()
-    model.fit(times, epochs, learning_rate, 10, None, 'Analytical', log_epoch=10)
+    model.fit(times, epochs, learning_rate, in_size, 10, None, 'Trapezoid', log_epoch=10)
 
     loss_on_train = model.evaluate(times, in_size)
     print(f"Loss: {loss_on_train}")
