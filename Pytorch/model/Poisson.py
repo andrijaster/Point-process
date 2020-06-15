@@ -69,7 +69,7 @@ if __name__ == "__main__":
     model = Poisson()
     model.fit(times, epochs, learning_rate, in_size, 10, None, 'Trapezoid', log_epoch=10)
 
-    loss_on_train = model.evaluate(times, in_size)
+    loss_on_train = model.evaluate(times)
     print(f"Loss: {loss_on_train}")
     evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
     evaluation_df.loc[len(evaluation_df)] = ['PoissonAnalytical', 'synthetic', loss_on_train.data.numpy()[0], None]
