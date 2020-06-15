@@ -1,11 +1,4 @@
 model_name,hour,lambda,loss_on_train
-Poisson,08,"tensor([0.0817], grad_fn=<AbsBackward>)",83.82225036621094
-Poisson,09,"tensor([0.0467], grad_fn=<AbsBackward>)",663.826904296875
-Poisson,10,"tensor([0.0488], grad_fn=<AbsBackward>)",663.6873168945312
-Poisson,08,"tensor([0.0619], grad_fn=<AbsBackward>)",82.96697235107422
-Poisson,09,"tensor([0.0494], grad_fn=<AbsBackward>)",663.7020263671875
-Poisson,08,"tensor([0.0618], grad_fn=<AbsBackward>)",82.9673843383789
-Poisson,09,"tensor([0.0493], grad_fn=<AbsBackward>)",663.7012939453125
 Poisson,08,"tensor([0.0618], grad_fn=<AbsBackward>)",82.9673843383789
 Poisson,09,"tensor([0.0493], grad_fn=<AbsBackward>)",663.7012939453125
 Poisson,10,"tensor([0.0487], grad_fn=<AbsBackward>)",663.6868896484375
