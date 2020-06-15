@@ -51,13 +51,13 @@ class Poisson():
 
     def integral_analytical(self, time):
         def integral_analytical_solve(prior, t):
-            integral = self.model.b*t
             z0 = self.model(prior, t)
+            integral = z0*t
             return z0, integral
 
         return integral_analytical_solve(time[0, :-1], time[0, -1])
 
-    def integral(self, time, in_size, no_steps, h = None , atribute = None, method = "Euler"):
+    def integral(self, time, in_size, no_steps, h = None, atribute = None, method = "Euler"):
 
         def integral_solve(z0, time_to_t0, t0, t1, atribute, no_steps = 10, h = None, method ="Euler"):
             if no_steps is not None:
