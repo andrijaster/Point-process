@@ -1,0 +1,7 @@
+model_name,rule,no_step,learning_rate,loss_on_train
+Poisson,Euler,10,0.001,16175.9404296875
+Poisson,Implicit Euler,10,0.001,17228.818359375
+Poisson,Trapezoid,10,0.001,16167.8603515625
+Poisson,Simpsons,10,0.001,15111.93359375
+Poisson,Gaussian_Q,10,0.001,14062.193359375
+Poisson,Analytical,10,0.001,15112.6533203125
