@@ -30,7 +30,7 @@ if __name__ == "__main__":
     one_day_df['date1_ts'] = one_day_df['date1_ts'] - one_day_df['date1_ts'].min()
     one_day_df = one_day_df.sort_values(by='date1_ts')
 
-    learning_param_map = {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001}
+    learning_param_map = {'rule': 'Analytical', 'no_step': 10, 'learning_rate': 0.001}
     models_to_evaluate = {'model': Poisson(), 'learning_param_map': learning_param_map}
 
     print(f'Observed day: {OBSERVED_DAY}. Number of events: {str(one_day_df.shape[0])}')
