@@ -1,10 +1,10 @@
 model_name,hour,lambda,loss_on_train
-Poisson,08,"tensor([0.1894], grad_fn=<AbsBackward>)",103.18436431884766
-Poisson,09,"tensor([0.1394], grad_fn=<AbsBackward>)",797.593994140625
-Poisson,10,"tensor([0.0894], grad_fn=<AbsBackward>)",701.4356689453125
-Poisson,11,"tensor([0.0395], grad_fn=<AbsBackward>)",605.2891845703125
-Poisson,12,"tensor([0.0026], grad_fn=<AbsBackward>)",990.7440795898438
-Poisson,13,"tensor([0.0039], grad_fn=<AbsBackward>)",929.1282958984375
-Poisson,14,"tensor([0.0047], grad_fn=<AbsBackward>)",817.7791137695312
-Poisson,15,"tensor([0.0003], grad_fn=<AbsBackward>)",1351.114990234375
-Poisson,16,"tensor([0.0006], grad_fn=<AbsBackward>)",667.3731689453125
+Poisson,08,"tensor([0.6912], grad_fn=<AbsBackward>)",251.08172607421875
+Poisson,09,"tensor([0.5914], grad_fn=<AbsBackward>)",2090.956787109375
+Poisson,10,"tensor([0.4917], grad_fn=<AbsBackward>)",1783.53662109375
+Poisson,11,"tensor([0.3922], grad_fn=<AbsBackward>)",1337.1290283203125
+Poisson,12,"tensor([0.2930], grad_fn=<AbsBackward>)",1195.417236328125
+Poisson,13,"tensor([0.1946], grad_fn=<AbsBackward>)",929.5849609375
+Poisson,14,"tensor([0.1000], grad_fn=<AbsBackward>)",650.5345458984375
+Poisson,15,"tensor([0.0483], grad_fn=<AbsBackward>)",663.6928100585938
+Poisson,16,"tensor([0.0529], grad_fn=<AbsBackward>)",354.551025390625
