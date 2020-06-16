@@ -1,11 +1,6 @@
 
 import pandas as pd
 from Pytorch.model.Poisson import Poisson
-from Pytorch.model.PoissonPolynomial import PoissonPolynomial
-from Pytorch.model.PoissonPolynomialFirstOrder import PoissonPolynomialFirstOrder
-from Pytorch.model.Hawkes import Hawkes
-from Pytorch.model.HawkesSumGaussians import HawkesSumGaussians
-from Pytorch.model.SelfCorrectingProcess import SelfCorrectingProcess
 import torch
 import pickle
 import math
@@ -37,8 +32,8 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    learning_rate = 0.001
-    epochs = 100
+    learning_rate = 0.01
+    epochs = 500
     evaluation_df = pd.DataFrame(columns=['model_name', 'hour', 'lambda', 'loss_on_train'])
     # evaluation_df = pd.read_csv(f'../results/skijasi_baseline_scores-{OBSERVED_DAY}.csv')
     active_hours = [f'0{str(h)}' if len(str(h))==1 else str(h) for h in np.arange(8,18)]
@@ -53,9 +48,9 @@ if __name__ == "__main__":
             model = models_to_evaluate['model']
             model.fit(time, epochs, learning_param_map['learning_rate'], in_size,
                       learning_param_map['no_step'], None, learning_param_map['rule'], log_epoch=10)
-            loss_on_train = model.evaluate(time)
+            loss_on_train = model.evaluate(time, in_size)
             print(f"Model: {h} hour. Loss on train: {str(loss_on_train.data.numpy())}")
-            evaluation_df.loc[len(evaluation_df)] = ['Poisson', h, model.model(), loss_on_train.data.numpy()[0]]
+            evaluation_df.loc[len(evaluation_df)] = ['Poisson', h, model.model(time, []), loss_on_train.data.numpy()[0]]
 
     print(evaluation_df)
     evaluation_df.to_csv(f'../results/skijasi_lambdas-{OBSERVED_DAY}.csv', index=False)
