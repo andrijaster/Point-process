@@ -5,13 +5,14 @@ Created on Sun Dec 15 18:45:27 2019
 @author: Andri
 """
 
-import torch
-import numpy as np
-from torch import nn, optim
-from scipy.ndimage.interpolation import shift
-from scipy.special import p_roots
 import math
-import pandas as pd
+import pickle
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from scipy.special import p_roots
+from torch import nn
 
 
 class FCN_point_process_all():
@@ -135,7 +136,8 @@ class FCN_point_process_all():
             out = torch.exp(self.fc(x))
             return out
 
-    def fit(self, time, in_size, atribute_0 = None, no_steps = 10, h = None, no_epoch = 100, log = 1, log_epoch = 1, method = "Euler"):
+    def fit(self, train_time, test_time, in_size, atribute_0 = None, no_steps = 10, h = None, no_epoch = 100, log = 1, log_epoch = 1, method ="Euler"):
+        epochs, train_losses, test_losses = [], [], []
 
         " Training "
         self.model.train()
@@ -144,14 +146,23 @@ class FCN_point_process_all():
         optimizer_1 = torch.optim.Adam(list_1, lr = 0.001)
 
         for e in range(no_epoch):
-            z_, integral_ = FCN_point_process_all.integral(self, time, in_size, no_steps = no_steps, h = h, method = method)
-            loss1 = FCN_point_process_all.loss(z_, integral_)
+            z_, integral_ = FCN_point_process_all.integral(self, train_time, in_size, no_steps = no_steps, h = h, method = method)
+            train_loss = FCN_point_process_all.loss(z_, integral_)
             optimizer_1.zero_grad()
-            loss1.backward()
+            train_loss.backward()
             optimizer_1.step()
-            if e%log_epoch==0 and log == 1:
-                print(loss1)
 
+            epochs.append(e)
+            train_losses.append(train_loss)
+            self.model.eval()
+            z_test, integral_test = FCN_point_process_all.integral(self, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
+            test_loss = FCN_point_process_all.loss(z_test, integral_test)
+            test_losses.append(test_loss)
+            self.model.train()
+
+            if e%log_epoch==0 and log == 1:
+                print(train_loss)
+        return epochs, train_losses, test_losses
 
     def predict(self, time, atribute = None):
         self.model.eval()
@@ -186,7 +197,6 @@ class FCN_point_process_all():
         return(loss1)
 
 
-
 if __name__ == "__main__":
 
     time = np.abs(100*np.random.rand(100))
@@ -196,14 +206,25 @@ if __name__ == "__main__":
     out_size = 1
     time[0] = 0
 
-    time = torch.tensor(time).type('torch.FloatTensor').reshape(1,-1,1)
+    train_time, test_time = time[:80], time[80:]
+    train_time = torch.tensor(train_time).type('torch.FloatTensor').reshape(1, -1, 1)
+    test_time = torch.tensor(test_time).type('torch.FloatTensor').reshape(1, -1, 1)
 
     mod = FCN_point_process_all(in_size+1, out_size, drop = 0.0)
-    mod.fit(time, in_size, no_epoch=50, no_steps = 10, h = None, method = "Euler", log = 1, log_epoch=10)
-    print(mod.predict(time))
-    loss_on_train = mod.evaluate(time, in_size)
+    epochs, train_losses, test_losses = mod.fit(train_time, test_time, in_size, no_epoch=500, no_steps=10, h=None, method="Euler", log=1, log_epoch=10)
+    print(mod.predict(train_time))
+    loss_on_train = mod.evaluate(train_time, in_size)
     print(loss_on_train)
 
-    evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
-    evaluation_df.loc[len(evaluation_df)] = ['FCN', 'synthetic', loss_on_train.data.numpy()[0][0], None]
-    evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
+    train_losses, test_losses = [loss.detach().numpy()[0, 0] for loss in train_losses], \
+                                [loss.detach().numpy()[0, 0] for loss in test_losses]
+    plt.plot(epochs, train_losses, color='skyblue', linewidth=2, label='train')
+    plt.plot(epochs, test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
+    plt.legend()
+    plt.savefig('../../img/fcn_test_data.png')
+
+    pickle.dump(mod, open('../../models/test.torch', 'wb'))
+
+    # evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
+    # evaluation_df.loc[len(evaluation_df)] = ['FCN', 'synthetic', loss_on_train.data.numpy()[0][0], None]
+    # evaluation_df.to_csv('../../results/baseline_scores.csv', index=False)
