@@ -15,23 +15,23 @@ if __name__ == "__main__":
     data_folder = os.environ['DATA_FOLDER']
     data = pd.read_csv(data_folder+os.environ["TRAINING_DATASET"])
     data.date1 = pd.to_datetime(data.date1)
-    train_data = data[data.date1.dt.day <= 24]
-    test_data = data[data.date1.dt.day > 24]
+    train_data = data[data.date1.dt.hour < 21]
+    test_data = data[data.date1.dt.hour >= 21]
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 5
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
+        {'rule': 'Euler', 'no_step': 5, 'learning_rate': 0.001},
+        {'rule': 'Implicit Euler', 'no_step': 5, 'learning_rate': 0.001},
+        {'rule': 'Trapezoid', 'no_step': 5, 'learning_rate': 0.001},
+        {'rule': 'Simpsons', 'no_step': 5, 'learning_rate': 0.001},
+        {'rule': 'Gaussian_Q', 'no_step': 5, 'learning_rate': 0.001}
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 10, 'learning_rate': 0.001}]
     models_to_evaluate = [
-        {'model': FCN_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
+#        {'model': FCN_point_process_all(in_size+1, out_size, drop=0.2), 'learning_param_map': learning_param_map},
         {'model': GRU_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': LSTM_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': RNN_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map}
@@ -60,11 +60,11 @@ if __name__ == "__main__":
                                                      params['learning_rate'],
                                                      loss_on_train.data.numpy()[0],
                                                      loss_on_test.data.numpy()[0]]
-            model_filepath = f"../models/autoput-012017/autoput-012017-{type(model).__name__}-{params['rule']}.torch"
+            model_filepath = f"models/autoput-012017/autoput-012017-{type(model).__name__}-{params['rule']}.torch"
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('../results/jan_autoput_scores_0.1.csv', index=False)
+    evaluation_df.to_csv('results/jan_autoput_scores_0.1.csv', index=False)
 
 
 
