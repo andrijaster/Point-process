@@ -37,22 +37,22 @@ if __name__ == "__main__":
     # evaluation_df = pd.read_csv(f'../results/skijasi_baseline_scores-{OBSERVED_DAY}.csv')
     active_hours = [f'0{str(h)}' if len(str(h))==1 else str(h) for h in np.arange(8,18)]
 
-    for h in active_hours:
-        hour_df = one_day_df[one_day_df.date1.dt.strftime('%H') == h]
-        hour_df['date1_ts'] = hour_df.date1_ts - hour_df.date1_ts.min()
-        print(f'Observed hour: {h}. Number of events: {str(hour_df.shape[0])}')
-        time = torch.tensor(hour_df.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
-
-        if time.shape[1] > 0:
-            model = models_to_evaluate['model']
-            model.fit(time, epochs, learning_param_map['learning_rate'], in_size,
-                      learning_param_map['no_step'], None, learning_param_map['rule'], log_epoch=10)
-            loss_on_train = model.evaluate(time, in_size)
-            print(f"Model: {h} hour. Loss on train: {str(loss_on_train.data.numpy())}")
-            evaluation_df.loc[len(evaluation_df)] = ['Poisson', h, model.model(time, []), loss_on_train.data.numpy()[0]]
-
-    print(evaluation_df)
-    evaluation_df.to_csv(f'../results/skijasi_lambdas-{OBSERVED_DAY}.csv', index=False)
+    # for h in active_hours:
+    #     hour_df = one_day_df[one_day_df.date1.dt.strftime('%H') == h]
+    #     hour_df['date1_ts'] = hour_df.date1_ts - hour_df.date1_ts.min()
+    #     print(f'Observed hour: {h}. Number of events: {str(hour_df.shape[0])}')
+    #     time = torch.tensor(hour_df.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
+    #
+    #     if time.shape[1] > 0:
+    #         model = models_to_evaluate['model']
+    #         model.fit(time, epochs, learning_param_map['learning_rate'], in_size,
+    #                   learning_param_map['no_step'], None, learning_param_map['rule'], log_epoch=10)
+    #         loss_on_train = model.evaluate(time, in_size)
+    #         print(f"Model: {h} hour. Loss on train: {str(loss_on_train.data.numpy())}")
+    #         evaluation_df.loc[len(evaluation_df)] = ['Poisson', h, model.model(time, []), loss_on_train.data.numpy()[0]]
+    #
+    # print(evaluation_df)
+    # evaluation_df.to_csv(f'../results/skijasi_lambdas-{OBSERVED_DAY}.csv', index=False)
 
 
 
