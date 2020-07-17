@@ -24,8 +24,8 @@ if __name__ == "__main__":
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Euler', 'no_step': 2, 'learning_rate': 0.001},
+        {'rule': 'Implicit Euler', 'no_step': 2, 'learning_rate': 0.001},
         {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
         {'rule': 'Simpsons', 'no_step':10, 'learning_rate': 0.001},
         {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 50
+    no_epochs = 10
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train', 'loss_on_test'])
 
     for model_definition in models_to_evaluate:
@@ -52,17 +52,17 @@ if __name__ == "__main__":
                       no_steps=params['no_step'], method=params['rule'], log_epoch=10)
 
             model_name = f"autoput-01012017-{type(model).__name__}-{params['rule']}"
-
-            train_losses, test_losses = [loss.detach().numpy()[0, 0] for loss in train_losses], \
-                                        [loss.detach().numpy()[0, 0] for loss in test_losses]
-            plt.plot(epochs, train_losses, color='skyblue', linewidth=2, label='train')
-            plt.plot(epochs, test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
+            p_train_losses = [loss.detach().numpy()[0] for loss in train_losses]
+            p_test_losses = [loss.detach().numpy()[0, 0] for loss in test_losses]
+            print(p_train_losses, p_test_losses)
+            plt.plot(epochs, p_train_losses, color='skyblue', linewidth=2, label='train')
+            plt.plot(epochs, p_test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
             plt.legend()
             plt.savefig(f'img/{model_name}.png')
 
             loss_on_train = model.evaluate(train_time, in_size, method='Trapezoid')
             loss_on_test = model.evaluate(test_time, in_size, method='Trapezoid')
-            print(f"Model: {type(model).__name__}. Loss on train: {str(loss_on_train.data.numpy())},  "
+            print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy())},  "
                   f"loss on test: {str(loss_on_test.data.numpy())}")
             evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
                                                      params['rule'],
@@ -75,7 +75,3 @@ if __name__ == "__main__":
 
     print(evaluation_df)
     evaluation_df.to_csv('results/jan_autoput_scores_0.1.csv', index=False)
-
-
-
-
