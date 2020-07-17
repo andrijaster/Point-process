@@ -19,7 +19,7 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
 
     files = []
-    data_folder = '../data/autoput/'
+    data_folder = '../../data/autoput/prepared/'
     for (dirpath, dirnames, filenames) in walk(data_folder):
         files.extend(filenames)
         break
