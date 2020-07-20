@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 3
+    no_epochs = 80
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train', 'loss_on_test'])
 
     for model_definition in models_to_evaluate:
