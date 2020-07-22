@@ -1,0 +1,16 @@
+model_name,rule,no_step,learning_rate,loss_on_train,loss_on_test
+GRU_point_process_all,Euler,6,0.01,145364.890625,20734.53125
+GRU_point_process_all,Implicit Euler,6,0.01,178547.203125,25330.978515625
+GRU_point_process_all,Trapezoid,6,0.01,128351.78125,18093.65234375
+GRU_point_process_all,Simpsons,6,0.01,102630.90625,14503.73046875
+GRU_point_process_all,Gaussian_Q,6,0.01,85997.2109375,12131.8046875
+LSTM_point_process_all,Euler,6,0.01,48981.00390625,7143.64453125
+LSTM_point_process_all,Implicit Euler,6,0.01,63486.484375,9198.9716796875
+LSTM_point_process_all,Trapezoid,6,0.01,44280.8203125,6520.5283203125
+LSTM_point_process_all,Simpsons,6,0.01,30061.458984375,4377.81591796875
+LSTM_point_process_all,Gaussian_Q,6,0.01,21098.4765625,2879.7880859375
+RNN_point_process_all,Euler,6,0.01,56052.7265625,7902.98828125
+RNN_point_process_all,Implicit Euler,6,0.01,70573.203125,10014.4736328125
+RNN_point_process_all,Trapezoid,6,0.01,55808.1171875,7866.73681640625
+RNN_point_process_all,Simpsons,6,0.01,43998.22265625,6137.94287109375
+RNN_point_process_all,Gaussian_Q,6,0.01,35266.1640625,4844.95947265625
