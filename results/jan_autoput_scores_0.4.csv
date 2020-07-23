@@ -1,0 +1,7 @@
+model_name,rule,no_step,learning_rate,loss_on_train,loss_on_test
+GRU_point_process_all,Trapezoid,6,0.4,46401.6328125,6493.982421875
+GRU_point_process_all,Gaussian_Q,6,0.4,39011.2890625,5403.66455078125
+LSTM_point_process_all,Trapezoid,6,0.4,39493.9296875,5481.23095703125
+LSTM_point_process_all,Gaussian_Q,6,0.4,24537.98046875,3231.2470703125
+RNN_point_process_all,Trapezoid,6,0.4,133834.8125,19139.46484375
+RNN_point_process_all,Gaussian_Q,6,0.4,109374.640625,15625.6728515625
