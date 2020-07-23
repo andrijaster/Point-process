@@ -27,9 +27,9 @@ if __name__ == "__main__":
     learning_param_map = [
         #{'rule': 'Euler', 'no_step': 6, 'learning_rate': 0.1},
         #{'rule': 'Implicit Euler', 'no_step': 6, 'learning_rate': 0.1},
-        {'rule': 'Trapezoid', 'no_step': 6, 'learning_rate': 0.1},
+        {'rule': 'Trapezoid', 'no_step': 6, 'learning_rate': 0.4},
         #{'rule': 'Simpsons', 'no_step': 6, 'learning_rate': 0.1},
-        {'rule': 'Gaussian_Q', 'no_step': 6, 'learning_rate': 0.1}
+        {'rule': 'Gaussian_Q', 'no_step': 6, 'learning_rate': 0.4}
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 2, 'learning_rate': 0.001}]
     models_to_evaluate = [
@@ -74,5 +74,5 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('results/jan_autoput_scores_0.3.csv', index=False)
+    evaluation_df.to_csv('results/jan_autoput_scores_0.4.csv', index=False)
 
