@@ -27,9 +27,9 @@ if __name__ == "__main__":
     learning_param_map = [
         #{'rule': 'Euler', 'no_step': 6, 'learning_rate': 0.1},
         #{'rule': 'Implicit Euler', 'no_step': 6, 'learning_rate': 0.1},
-        {'rule': 'Trapezoid', 'no_step': 6, 'learning_rate': 0.4},
+        {'rule': 'Trapezoid', 'no_step': 4, 'learning_rate': 0.4},
         #{'rule': 'Simpsons', 'no_step': 6, 'learning_rate': 0.1},
-        {'rule': 'Gaussian_Q', 'no_step': 6, 'learning_rate': 0.4}
+#        {'rule': 'Gaussian_Q', 'no_step': 6, 'learning_rate': 0.4}
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 2, 'learning_rate': 0.001}]
     models_to_evaluate = [
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 120
+    no_epochs = 200
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train', 'loss_on_test'])
 
     for model_definition in models_to_evaluate:
