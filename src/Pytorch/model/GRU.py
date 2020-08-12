@@ -187,16 +187,15 @@ class GRU_point_process_all():
 
             epochs.append(e)
             train_losses.append(train_loss)
-#            self.model.eval()
-#            z_test, integral_test = GRU_point_process_all.integral(self, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
-#            test_loss = GRU_point_process_all.loss(z_test, integral_test)
-#            test_losses.append(test_loss)
-#            self.model.train()
+            self.model.eval()
+            z_test, integral_test = GRU_point_process_all.integral(self, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
+            test_loss = GRU_point_process_all.loss(z_test, integral_test)
+            test_losses.append(test_loss)
+            self.model.train()
 
             if e%log_epoch==0 and log == 1:
                 print(train_loss)
-        return train_losses
-#        return epochs, train_losses, test_losses
+        return epochs, train_losses, test_losses
 
     def predict(self, time, hidden = None, atribute = None):
         self.model.eval()

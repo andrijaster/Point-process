@@ -26,16 +26,16 @@ if __name__ == "__main__":
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.1},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.1},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.1},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.1},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.1}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 2, 'learning_rate': 0.001}]
     models_to_evaluate = [
 #        {'model': FCN_point_process_all(in_size+1, out_size, drop=0.1), 'learning_param_map': learning_param_map},
-#        {'model': GRU_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
+        {'model': GRU_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': LSTM_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': RNN_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map}
     ]
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             epochs, train_losses, test_losses = model.fit(train_time, test_time, in_size, no_epoch=no_epochs,
                       no_steps=params['no_step'], method=params['rule'], log_epoch=10)
 
-            model_name = f"autoput-7-17_04072017-0.4-{type(model).__name__}-{params['rule']}"
+            model_name = f"autoput-18-19_04072017-0.01-{type(model).__name__}-{params['rule']}"
             train_losses = [loss.detach().numpy().flatten()[0] for loss in train_losses]
             test_losses = [loss.detach().numpy().flatten()[0] for loss in test_losses]
             plt.plot(epochs, train_losses, color='skyblue', linewidth=2, label='train')
@@ -75,5 +75,5 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('results/jul_04_7-17_autoput_scores_0.5.csv', index=False)
+    evaluation_df.to_csv('results/jul_04_18-19_autoput_scores_0.001.csv', index=False)
 
