@@ -1,0 +1,11 @@
+model_name,rule,no_step,learning_rate,loss_on_train,loss_on_test
+LSTM_point_process_all,Euler,10,0.1,1890.398193359375,1871.6153564453125
+LSTM_point_process_all,Implicit Euler,10,0.1,5738.3837890625,5761.90966796875
+LSTM_point_process_all,Trapezoid,10,0.1,2081.74609375,2061.14404296875
+LSTM_point_process_all,Simpsons,10,0.1,1657.959716796875,1633.604248046875
+LSTM_point_process_all,Gaussian_Q,10,0.1,1563.8690185546875,1531.414306640625
+RNN_point_process_all,Euler,10,0.1,4305.47607421875,4315.4248046875
+RNN_point_process_all,Implicit Euler,10,0.1,6736.34716796875,6761.06201171875
+RNN_point_process_all,Trapezoid,10,0.1,4398.27685546875,4408.83984375
+RNN_point_process_all,Simpsons,10,0.1,3214.302734375,3214.646484375
+RNN_point_process_all,Gaussian_Q,10,0.1,2483.334228515625,2474.902587890625

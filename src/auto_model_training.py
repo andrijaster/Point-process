@@ -17,24 +17,25 @@ if __name__ == "__main__":
     data_folder = os.environ['DATA_FOLDER']
     data = pd.read_csv(data_folder+os.environ["TRAINING_DATASET"])
     data.date1 = pd.to_datetime(data.date1)
-    train_data = data[data.date1.dt.hour < 21]
-    test_data = data[data.date1.dt.hour >= 21]
+    train_data = data[data.date1.dt.hour == 18]
+    test_data = data[data.date1.dt.hour == 19]
+    test_data['date1_ts'] = test_data['date1_ts'] - test_data['date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 5
     out_size = 1
 
     learning_param_map = [
-        #{'rule': 'Euler', 'no_step': 6, 'learning_rate': 0.1},
-        #{'rule': 'Implicit Euler', 'no_step': 6, 'learning_rate': 0.1},
-        {'rule': 'Trapezoid', 'no_step': 4, 'learning_rate': 0.4},
-        #{'rule': 'Simpsons', 'no_step': 6, 'learning_rate': 0.1},
-#        {'rule': 'Gaussian_Q', 'no_step': 6, 'learning_rate': 0.4}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.1},
+        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.1},
+        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.1},
+        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.1},
+        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.1}
     ]
     analytical_definition = [{'rule': 'Analytical', 'no_step': 2, 'learning_rate': 0.001}]
     models_to_evaluate = [
 #        {'model': FCN_point_process_all(in_size+1, out_size, drop=0.1), 'learning_param_map': learning_param_map},
-        {'model': GRU_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
+#        {'model': GRU_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': LSTM_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map},
         {'model': RNN_point_process_all(in_size+1, out_size, drop=0.0), 'learning_param_map': learning_param_map}
     ]
@@ -43,7 +44,7 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 200
+    no_epochs = 300
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train', 'loss_on_test'])
 
     for model_definition in models_to_evaluate:
@@ -52,7 +53,7 @@ if __name__ == "__main__":
             epochs, train_losses, test_losses = model.fit(train_time, test_time, in_size, no_epoch=no_epochs,
                       no_steps=params['no_step'], method=params['rule'], log_epoch=10)
 
-            model_name = f"autoput-01012017-0.3-{type(model).__name__}-{params['rule']}"
+            model_name = f"autoput-7-17_04072017-0.4-{type(model).__name__}-{params['rule']}"
             train_losses = [loss.detach().numpy().flatten()[0] for loss in train_losses]
             test_losses = [loss.detach().numpy().flatten()[0] for loss in test_losses]
             plt.plot(epochs, train_losses, color='skyblue', linewidth=2, label='train')
@@ -62,7 +63,7 @@ if __name__ == "__main__":
             plt.clf()
             loss_on_train = model.evaluate(train_time, in_size, method='Trapezoid')
             loss_on_test = model.evaluate(test_time, in_size, method='Trapezoid')
-            print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy())},  "
+            print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy())}, "
                   f"loss on test: {str(loss_on_test.data.numpy())}")
             evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
                                                      params['rule'],
@@ -74,5 +75,5 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('results/jan_autoput_scores_0.4.csv', index=False)
+    evaluation_df.to_csv('results/jul_04_7-17_autoput_scores_0.5.csv', index=False)
 
