@@ -75,5 +75,5 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv('results/jul_04_18-19_autoput_scores_0.001.csv', index=False)
+    evaluation_df.to_csv('results/jul_04_18-19_autoput_scores_0.01.csv', index=False)
 
