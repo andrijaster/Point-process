@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 model_name,rule,no_step,learning_rate,loss_on_train,loss_on_test
 GRU_point_process_all,Euler,10,0.001,169896.5625,24299.076171875
 GRU_point_process_all,Implicit Euler,10,0.001,193956.453125,27727.458984375
@@ -15,22 +14,3 @@ RNN_point_process_all,Implicit Euler,10,0.001,149760.109375,21382.61328125
 RNN_point_process_all,Trapezoid,10,0.001,132442.46875,18915.53125
 RNN_point_process_all,Simpsons,10,0.001,118178.1171875,16877.9140625
 RNN_point_process_all,Gaussian_Q,10,0.001,106389.0390625,15186.4091796875
-||||||| merged common ancestors
-=======
-model_name,rule,no_step,learning_rate,loss_on_train,loss_on_test
-GRU_point_process_all,Euler,5,0.001,[78980.16],[11223.931]
-GRU_point_process_all,Implicit Euler,5,0.001,[86705.336],[12329.828]
-GRU_point_process_all,Trapezoid,5,0.001,[78416.875],[11141.748]
-GRU_point_process_all,Simpsons,5,0.001,[71117.55],[10087.313]
-GRU_point_process_all,Gaussian_Q,5,0.001,[64731.75],[9160.686]
-LSTM_point_process_all,Euler,5,0.001,[147369.98],[21098.938]
-LSTM_point_process_all,Implicit Euler,5,0.001,[160986.97],[23059.861]
-LSTM_point_process_all,Trapezoid,5,0.001,[147522.53],[21116.105]
-LSTM_point_process_all,Simpsons,5,0.001,[140286.38],[20071.66]
-LSTM_point_process_all,Gaussian_Q,5,0.001,[133552.33],[19104.736]
-RNN_point_process_all,Euler,5,0.001,[43594.586],[6076.5312]
-RNN_point_process_all,Implicit Euler,5,0.001,[47128.89],[6597.59]
-RNN_point_process_all,Trapezoid,5,0.001,[43587.688],[6076.446]
-RNN_point_process_all,Simpsons,5,0.001,[40246.59],[5583.174]
-RNN_point_process_all,Gaussian_Q,5,0.001,[37225.57],[5135.487]
->>>>>>> bcb5251f3dc71b550bbd23a007bdf198e125621b
