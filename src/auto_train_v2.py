@@ -18,11 +18,12 @@ if __name__ == "__main__":
     project_dir = str(Path(__file__).parent.parent)
 
     data_folder = os.environ['DATA_FOLDER']
-    data = pd.read_csv(data_folder+os.environ["TRAINING_DATASET"])
+    dataset_path = os.environ["TRAINING_DATASET"]
+    data = pd.read_csv(data_folder+dataset_path)
     data.date1 = pd.to_datetime(data.date1)
     train_data = data[data.date1.dt.hour == 18]
     test_data = data[data.date1.dt.hour == 19]
-    test_data['date1_ts'] = test_data['date1_ts'] - test_data['date1_ts'].min()
+    test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 5
@@ -53,14 +54,16 @@ if __name__ == "__main__":
             model = model_definition['model']
             model_name = f"autoput-18-19_04072017-0.01-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
 
+            print(f"Starting to train a model: {model_name}")
+
             model = BaseTraining.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
                                      no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
                                      figpath=f"{project_dir}/img/{model_name}.png")
 
             loss_on_train = BaseTraining.evaluate(model, train_time, in_size, method='Trapezoid')
             loss_on_test = BaseTraining.evaluate(model, test_time, in_size, method='Trapezoid')
-            print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy())}, "
-                  f"loss on test: {str(loss_on_test.data.numpy())}")
+            print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy().flatten()[0])}, "
+                  f"loss on test: {str(loss_on_test.data.numpy().flatten()[0])}")
             evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
                                                      params['rule'],
                                                      params['no_step'],

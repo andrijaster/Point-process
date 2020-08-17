@@ -112,16 +112,17 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         optimizer_1.step()
 
         epochs.append(e)
-        train_losses.append(train_loss.data[0])
+        train_losses.append(train_loss.data.numpy().flatten()[0])
         # model.eval()
         # z_test, integral_test = integral(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
         # test_loss = loss(z_test, integral_test)
         test_loss = evaluate(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
-        test_losses.append(test_loss.data[0])
+        test_losses.append(test_loss.data.numpy().flatten()[0])
         model.train()
 
         if e % log_epoch == 0 and log == 1:
-            print(f"Epoch: {e}, train loss: {train_loss.data[0]}, test loss: {test_loss.data[0]}")
+            print(f"Epoch: {e}, train loss: {train_loss.data.numpy().flatten()[0]}, "
+                  f"test loss: {test_loss.data.numpy().flatten()[0]}")
             plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
             plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
             plt.legend(loc="upper right")
