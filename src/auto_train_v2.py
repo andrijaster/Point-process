@@ -21,8 +21,8 @@ if __name__ == "__main__":
     dataset_path = os.environ["TRAINING_DATASET"]
     data = pd.read_csv(data_folder+dataset_path)
     data.date1 = pd.to_datetime(data.date1)
-    train_data = data[data.date1.dt.hour == 18]
-    test_data = data[data.date1.dt.hour == 19]
+    train_data = data[data.date1.dt.hour <= 15]
+    test_data = data[data.date1.dt.hour > 15]
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
@@ -31,9 +31,9 @@ if __name__ == "__main__":
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
+        # {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
         {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
+        # {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
         {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
@@ -46,13 +46,13 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 50
+    no_epochs = 500
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'loss_on_train', 'loss_on_test'])
 
     for model_definition in models_to_evaluate:
         for params in model_definition['learning_param_map']:
             model = model_definition['model']
-            model_name = f"autoput-18-19_04072017-0.01-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
+            model_name = f"autoput-7-17_04072017-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
 
             print(f"Starting to train a model: {model_name}")
 
@@ -74,5 +74,5 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"results/jul_04_18-19_autoput_scores_{learning_param_map.get(0)['learning_rate']}.csv",
+    evaluation_df.to_csv(f"results/jul_04_7-17_autoput_scores_{str(learning_param_map[0]['learning_rate'])}.csv",
                          index=False)
