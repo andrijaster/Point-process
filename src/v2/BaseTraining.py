@@ -99,7 +99,6 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
 
     " Training "
     model.train()
-    plt.clf()
 
     list_1 = list(model.parameters())
     optimizer_1 = torch.optim.Adam(list_1, lr=lr)
@@ -123,6 +122,7 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         if e % log_epoch == 0 and log == 1:
             print(f"Epoch: {e}, train loss: {train_loss.data.numpy().flatten()[0]}, "
                   f"test loss: {test_loss.data.numpy().flatten()[0]}")
+            plt.clf()
             plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
             plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
             plt.legend(loc="upper right")
