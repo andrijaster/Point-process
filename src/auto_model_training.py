@@ -17,8 +17,9 @@ if __name__ == "__main__":
     data_folder = os.environ['DATA_FOLDER']
     data = pd.read_csv(data_folder+os.environ["TRAINING_DATASET"])
     data.date1 = pd.to_datetime(data.date1)
-    train_data = data[data.date1.dt.hour == 18]
-    test_data = data[data.date1.dt.hour == 19]
+    print(f"dates: min={data.date1.min()}, max={data.date1.max()}")
+    train_data = data[data.date1.dt.day <= 5]
+    test_data = data[data.date1.dt.day > 5]
     test_data['date1_ts'] = test_data['date1_ts'] - test_data['date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
