@@ -21,8 +21,8 @@ if __name__ == "__main__":
     dataset_path = os.environ["TRAINING_DATASET"]
     data = pd.read_csv(data_folder+dataset_path)
     data.date1 = pd.to_datetime(data.date1)
-    train_data = data[data.date1.dt.day <= 23]
-    test_data = data[data.date1.dt.day > 23]
+    train_data = data[data.date1.dt.day <= 5]
+    test_data = data[data.date1.dt.day > 5]
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
