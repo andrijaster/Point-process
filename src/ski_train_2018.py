@@ -25,8 +25,8 @@ if __name__ == "__main__":
     dataset_path = 'ski_kg_2005-2020.csv'  # os.environ["TRAINING_DATASET"]
     data = pd.read_csv(data_folder+dataset_path)
 
-    train_data = data[data.godina < 2017]
-    test_data = data[data.godina >= 2017]
+    train_data = data[data.godina == 2018]
+    test_data = data[data.godina == 2019]
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     for model_definition in models_to_evaluate:
         for params in model_definition['learning_param_map']:
             model = model_definition['model']
-            model_name = f"ski-kg-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
+            model_name = f"ski-kg-2018-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
 
             print(f"Starting to train a model: {model_name}")
             t0 = time.time()
@@ -82,4 +82,4 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"results/ski_kg_scores_{str(learning_param_map[0]['learning_rate'])}_0.1.csv", index=False)
+    evaluation_df.to_csv(f"results/ski_kg_2018_scores_{str(learning_param_map[0]['learning_rate'])}_0.2.csv", index=False)
