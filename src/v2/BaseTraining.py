@@ -95,7 +95,12 @@ def loss(z, integral):
 
 def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, h=None, no_epoch=100, log=1,
         log_epoch=10, figpath='model.png'):
-    epochs, train_losses, test_losses = [], [], []
+    train_losses, test_losses = [], []
+
+    init_loss = evaluate(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid').data.numpy().flatten()[0]
+    if np.isnan(init_loss) or np.isinf(init_loss):
+        print(f"Init loss: {init_loss}. It needs to reinitialize the model.")
+        return None
 
     " Training "
     model.train()
@@ -108,13 +113,10 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         train_loss = loss(z_, integral_)
         optimizer_1.zero_grad()
         train_loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer_1.step()
 
-        epochs.append(e)
         train_losses.append(train_loss.data.numpy().flatten()[0])
-        # model.eval()
-        # z_test, integral_test = integral(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
-        # test_loss = loss(z_test, integral_test)
         test_loss = evaluate(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
         test_losses.append(test_loss.data.numpy().flatten()[0])
         model.train()

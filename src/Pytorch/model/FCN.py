@@ -13,7 +13,8 @@ import numpy as np
 import torch
 from scipy.special import p_roots
 from torch import nn
-
+from pathlib import Path
+import pandas as pd
 
 class FCN_point_process_all():
 
@@ -199,16 +200,29 @@ class FCN_point_process_all():
 
 if __name__ == "__main__":
 
-    time = np.abs(100*np.random.rand(100))
+    time = np.abs(100*np.random.rand(10000))
     time.sort()
     in_size = 5
 
     out_size = 1
     time[0] = 0
 
-    train_time, test_time = time[:80], time[80:]
-    train_time = torch.tensor(train_time).type('torch.FloatTensor').reshape(1, -1, 1)
-    test_time = torch.tensor(test_time).type('torch.FloatTensor').reshape(1, -1, 1)
+    # train_time, test_time = time[:80], time[80:]
+    # train_time = torch.tensor(train_time).type('torch.FloatTensor').reshape(1, -1, 1)
+    # test_time = torch.tensor(test_time).type('torch.FloatTensor').reshape(1, -1, 1)
+    project_dir = str(Path(__file__).parent.parent)
+
+    data_folder = project_dir+'/../../data/geoloc/'
+    dataset_path = 'zh_hb_main_station-24-25.082020.csv'  # os.environ["TRAINING_DATASET"]
+    data = pd.read_csv(data_folder+dataset_path)
+
+    train_data = data[data.day == 24]
+    test_data = data[data.day == 25]
+    test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
+    train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
+    test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
+    print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
+          f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
     mod = FCN_point_process_all(in_size+1, out_size, drop = 0.0)
     epochs, train_losses, test_losses = mod.fit(train_time, test_time, in_size, no_epoch=500, no_steps=10, h=None, method="Euler", log=1, log_epoch=10)
@@ -221,9 +235,9 @@ if __name__ == "__main__":
     plt.plot(epochs, train_losses, color='skyblue', linewidth=2, label='train')
     plt.plot(epochs, test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
     plt.legend()
-    plt.savefig('../../img/fcn_test_data.png')
+    # plt.savefig('../../img/fcn_test_data.png')
 
-    pickle.dump(mod, open('../../models/test.torch', 'wb'))
+    # pickle.dump(mod, open('../../models/test.torch', 'wb'))
 
     # evaluation_df = pd.read_csv('../../results/baseline_scores.csv')
     # evaluation_df.loc[len(evaluation_df)] = ['FCN', 'synthetic', loss_on_train.data.numpy()[0][0], None]
