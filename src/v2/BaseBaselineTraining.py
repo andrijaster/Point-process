@@ -8,7 +8,7 @@ import numpy as np
 
 def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Euler"):
 
-    def integral_solve(z0, t0, t1, atribute, no_steps=10, h=None, hidden=None, method="Euler"):
+    def integral_solve(z0, time_to_t0, t0, t1, atribute, no_steps=10, h=None, method="Euler"):
         if no_steps is not None:
             h_max = (t1 - t0)/no_steps
         elif h is not None:
@@ -31,20 +31,20 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
                 integral += z0*h_max
                 t = t + h_max
                 atribute = atribute + h_max
-                z0, hidden = model(atribute, t, hidden=hidden)
+                z0 = model(atribute, t)
 
         if method == "Implicit_Euler":
             for _ in range(no_steps):
                 t = t + h_max
                 atribute = atribute + h_max
-                z0, hidden = model(atribute, t, hidden=hidden)
+                z0 = model(atribute, t)
                 integral += z0*h_max
 
         if method == "Trapezoid":
             for _ in range(no_steps):
                 t = t + h_max
                 atribute = atribute + h_max
-                z1, hidden = model(atribute, t, hidden=hidden)
+                z1 = model(atribute, t)
                 integral += (z0+z1)*0.5*h_max
                 z0 = z1
 
@@ -54,7 +54,7 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
             for _ in range(no_steps):
                 t = t + h_max
                 atribute = atribute + h_max
-                z0, hidden = model(atribute, t, hidden=hidden)
+                z0 = model(atribute, t)
                 z.append(z0)
             integral = h_max/3*sum(z[0:-1:2] + 4*z[1::2] + z[2::2])
 
@@ -64,23 +64,23 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
             for i in range(time_integral.shape[0]):
                 t = time_integral[i]
                 atribute = atribute + h_max
-                z0 , hidden = model(atribute, t, hidden=hidden)
+                z0 = model(atribute, t)
                 integral += weights[i]*z0
             atribute = atribute + t1
-            z0, hidden = model(atribute, t1)
+            z0 = model(atribute, t1)
 
-        return integral, z0, atribute, hidden
+        return integral, z0, atribute
 
     integral_ = 0
     time_len = time.size(1)
     if atribute is None:
-        atribute = torch.ones(in_size).reshape(1, -1)*0
+        atribute = torch.ones(in_size).reshape(1,-1)*0
     z = torch.zeros(time.shape)
-    z0, hidden = model(atribute, time[0, 0])
-    z[:, 0] = z0
+    z0 = model(atribute, time[0, 0])
+    z[:,0] = z0
     for i in range(time_len-1):
-        integral_interval, z_, atribute, hidden = integral_solve(z0, time[0, i], time[0, i+1], atribute,
-                                                                 hidden=hidden, no_steps=no_steps, h=h, method=method)
+        integral_interval, z_, atribute = integral_solve(z0, time[0, :i], time[0, i], time[0, i+1],
+                                                         atribute, no_steps=no_steps, h=h, method=method)
         integral_ += integral_interval
         atribute[:, 1:] = atribute[:, :-1].clone()
         atribute[:, 0] = 0
@@ -109,9 +109,12 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
     optimizer_1 = torch.optim.Adam(list_1, lr=lr)
 
     for e in range(no_epoch):
-        z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method)
-        train_loss = loss(z_, integral_)
         optimizer_1.zero_grad()
+        if method == "Analytical":
+            z_, integral_ = model.integral_analytical(train_time)
+        else:
+            z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method)
+        train_loss = loss(z_, integral_)
         train_loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer_1.step()
@@ -139,41 +142,6 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
     plt.show()
 
     return model
-
-
-def predict(model, time, in_size, hidden=None, atribute=None):
-    model.eval()
-    time_len = time.size(1)
-    if atribute is None:
-        atribute = torch.ones(in_size).reshape(1, -1)*0
-    z = torch.zeros(time.shape)
-    if hidden is None:
-        z0, hidden = model(atribute, time[0, 0])
-    elif hidden is not None:
-        z0, hidden = model(atribute, time[0, 0], hidden)
-    z[:,0] = z0
-    for i in range(time_len-1):
-        atribute = atribute + time[0, i+1]
-        z[:, i+1], hidden = model(atribute, time[:, i+1], hidden)
-        atribute[:, 1:] = atribute[:, :-1].clone()
-        atribute[:, 0] = 0
-    return z
-
-
-def predict_without_hidden(self, time, in_size, atribute=None):
-    self.model.eval()
-    time_len = time.size(1)
-    if atribute is None:
-        atribute = torch.ones(in_size).reshape(1, -1)*0
-    z = torch.zeros(time.shape)
-    z0 = self.model(atribute, time[0, 0])
-    z[:, 0] = z0
-    for i in range(time_len-1):
-        atribute = atribute + time[0, i+1]
-        z[:, i+1] = self.model(atribute, time[:, i+1])
-        atribute[:, 1:] = atribute[:, :-1].clone()
-        atribute[:, 0] = 0
-    return z
 
 
 def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler"):

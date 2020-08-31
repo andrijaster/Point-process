@@ -22,8 +22,8 @@ class FCNPointProcess(nn.Module):
 
         self.fc = nn.Sequential(*lst)
 
-    def forward(self, x, t, hidden=None):
+    def forward(self, x, t):
         t = t.to(torch.float32)
         x = torch.cat((x, t.reshape(1, -1)), dim=1)
         out = torch.exp(self.fc(x))
-        return out, None
+        return out
