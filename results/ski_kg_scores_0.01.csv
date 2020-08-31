@@ -1,0 +1,10 @@
+model_name,rule,no_step,learning_rate,training_time,loss_on_train,loss_on_test
+GRUPointProcess,Euler,10,0.01,13395,21656798.0,5685982.0
+GRUPointProcess,Trapezoid,10,0.01,14526,686818.5625,180616.875
+GRUPointProcess,Gaussian_Q,10,0.01,17378,36363.5625,10923.697265625
+LSTMPointProcess,Euler,10,0.01,13932,14490026.0,3790047.5
+LSTMPointProcess,Trapezoid,10,0.01,14382,1220217.875,319956.34375
+LSTMPointProcess,Gaussian_Q,10,0.01,17400,113915.046875,30984.68359375
+RNNPointProcess,Euler,10,0.01,8789,2727225.5,715106.125
+RNNPointProcess,Trapezoid,10,0.01,9024,97247.09375,26652.7421875
+RNNPointProcess,Gaussian_Q,10,0.01,10493,20439.97265625,7032.7490234375

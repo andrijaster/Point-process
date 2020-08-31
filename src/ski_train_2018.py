@@ -34,11 +34,11 @@ if __name__ == "__main__":
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
+        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
         #{'model': FCNPointProcess(in_size+1, out_size, dropout=0.1), 'learning_param_map': learning_param_map},
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     for model_definition in models_to_evaluate:
         for params in model_definition['learning_param_map']:
             model = model_definition['model']
-            model_name = f"ski-kg-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
+            model_name = f"ski-kg-2018-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
 
             print(f"Starting to train a model: {model_name}")
             t0 = time.time()
@@ -82,4 +82,4 @@ if __name__ == "__main__":
             pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"results/ski_kg_scores_{str(learning_param_map[0]['learning_rate'])}_0.1.csv", index=False)
+    evaluation_df.to_csv(f"results/ski_kg_2018_scores_{str(learning_param_map[0]['learning_rate'])}_0.3.csv", index=False)
