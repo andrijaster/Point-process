@@ -73,7 +73,7 @@ if __name__ == "__main__":
                 t0 = time.time()
                 model = BaseTraining.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
                                          no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
-                                         figpath=f"{project_dir}/img/{model_name}.png")
+                                         figpath=f"{project_dir}/img/ski/{model_name}.png")
                 if model:
                     loss_on_train = BaseTraining.evaluate(model, train_time, in_size, method=params['rule'])
                     loss_on_test = BaseTraining.evaluate(model, test_time, in_size, method='Trapezoid')
