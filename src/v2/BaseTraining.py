@@ -129,6 +129,7 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
             plt.show()
 
     # always draw final img
+    plt.clf()
     plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
     plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
     plt.legend(loc="upper right")
