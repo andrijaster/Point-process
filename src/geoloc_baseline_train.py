@@ -34,10 +34,10 @@ if __name__ == "__main__":
     out_size = 1
 
     learning_param_map = [
-        # {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        # {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
-        # {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
-        # {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
         {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     in_size = 5
     out_size = 1
-    no_epochs = 2
+    no_epochs = 2000
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'training_time',
                                           'nr_of_reinit', 'loss_on_train', 'loss_on_test'])
 
