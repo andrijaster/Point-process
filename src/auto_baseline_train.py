@@ -1,13 +1,18 @@
 import pickle
+from pathlib import Path
+
+import pickle
 import time
 from pathlib import Path
 
 import pandas as pd
 import torch
-from v2 import BaseTraining
-from v2.GRUPointProcess import GRUPointProcess
-from v2.LSTMPointProcess import LSTMPointProcess
-from v2.RNNPointProcess import RNNPointProcess
+from v2 import BaseBaselineTraining as bb_train
+from v2.FCNPointProcess import FCNPointProcess
+from v2.PoissonTPP import PoissonTPP
+from v2.PoissonPolynomialTPP import PoissonPolynomialTPP
+from v2.PoissonPolynomialFirstOrderTPP import PoissonPolynomialFirstOrderTPP
+from v2.SelfCorrectingTPP import SelfCorrectingTPP
 
 if __name__ == "__main__":
 
@@ -22,6 +27,7 @@ if __name__ == "__main__":
     data.date1 = pd.to_datetime(data.date1)
     train_data = data[data.date1.dt.hour <= 13]
     test_data = data[data.date1.dt.hour > 13]
+
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
@@ -29,18 +35,20 @@ if __name__ == "__main__":
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
+        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
-        {'model': GRUPointProcess, 'learning_param_map': learning_param_map},
-        {'model': LSTMPointProcess, 'learning_param_map': learning_param_map},
-        {'model': RNNPointProcess, 'learning_param_map': learning_param_map}
+        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
+        {'model': PoissonTPP, 'learning_param_map': learning_param_map},
+        {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map},
+        {'model': PoissonPolynomialFirstOrderTPP, 'learning_param_map': learning_param_map},
+        # TODO: {'model': SelfCorrectingTPP, 'learning_param_map': learning_param_map},
+        {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map}
     ]
-
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
@@ -57,17 +65,20 @@ if __name__ == "__main__":
 
             while not model:
                 counter += 1
-                model = model_definition['model'](in_size+1, out_size, dropout=0.0)
+                if model_definition['model'].__name__ == 'FCNPointProcess':
+                    model = model_definition['model'](in_size+1, out_size, dropout=0.1)
+                else:
+                    model = model_definition['model']()
                 model_name = f"autoput-040717-{type(model).__name__}-{params['learning_rate']}-{params['rule']}"
 
                 print(f"{counter}. Starting to train a model: {model_name}")
                 t0 = time.time()
-                model = BaseTraining.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
+                model = bb_train.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
                                          no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
                                          figpath=f"{project_dir}/img/autoput/{model_name}.png")
                 if model:
-                    loss_on_train = BaseTraining.evaluate(model, train_time, in_size, method=params['rule'])
-                    loss_on_test = BaseTraining.evaluate(model, test_time, in_size, method='Trapezoid')
+                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method=params['rule'])
+                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid')
                     print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy().flatten()[0])}, "
                           f"loss on test: {str(loss_on_test.data.numpy().flatten()[0])}")
                     evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
@@ -82,6 +93,5 @@ if __name__ == "__main__":
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-
-    evaluation_df.to_csv(f"results/autoput_scores_040717_{str(learning_param_map[0]['learning_rate'])}.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/autoput_baselines_scores_040717_{str(learning_param_map[0]['learning_rate'])}.csv",
                          index=False)
