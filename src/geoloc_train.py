@@ -40,7 +40,7 @@ if __name__ == "__main__":
         {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
+#        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
         {'model': GRUPointProcess, 'learning_param_map': learning_param_map},
         {'model': LSTMPointProcess, 'learning_param_map': learning_param_map},
         {'model': RNNPointProcess, 'learning_param_map': learning_param_map}
@@ -86,5 +86,5 @@ if __name__ == "__main__":
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"{project_dir}results/zh_main_station_240820_{str(learning_param_map[0]['learning_rate'])}.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/zh_main_station_240820_{str(learning_param_map[0]['learning_rate'])}.csv",
                          index=False)

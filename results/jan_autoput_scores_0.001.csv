@@ -1,0 +1,7 @@
+model_name,rule,no_step,learning_rate,training_time,loss_on_train,loss_on_test
+autoput-012017-GRUPointProcess-0.001-Euler,Euler,10,0.001,158525,322794.6875,127984.7109375
+autoput-012017-GRUPointProcess-0.001-Gaussian_Q,Gaussian_Q,10,0.001,200960,142256.03125,58751.79296875
+autoput-012017-LSTMPointProcess-0.001-Euler,Euler,10,0.001,150696,170562.5,64658.6640625
+autoput-012017-LSTMPointProcess-0.001-Gaussian_Q,Gaussian_Q,10,0.001,205582,125467.390625,45171.30859375
+autoput-012017-RNNPointProcess-0.001-Euler,Euler,10,0.001,130971,96199.59375,31724.779296875
+autoput-012017-RNNPointProcess-0.001-Gaussian_Q,Gaussian_Q,10,0.001,144099,81005.234375,22857.93359375
