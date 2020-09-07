@@ -13,6 +13,9 @@ from v2.PoissonTPP import PoissonTPP
 from v2.PoissonPolynomialTPP import PoissonPolynomialTPP
 from v2.PoissonPolynomialFirstOrderTPP import PoissonPolynomialFirstOrderTPP
 from v2.SelfCorrectingTPP import SelfCorrectingTPP
+from v2.HawkesSumGaussianTPP import HawkesSumGaussianTPP
+from v2.HawkesTPP import HawkesTPP
+
 
 if __name__ == "__main__":
 
@@ -42,12 +45,14 @@ if __name__ == "__main__":
         {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
-        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
-        {'model': PoissonTPP, 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialFirstOrderTPP, 'learning_param_map': learning_param_map},
+        {'model': HawkesTPP, 'learning_param_map': learning_param_map},
+        {'model': HawkesSumGaussianTPP, 'learning_param_map': learning_param_map}
+        # {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
+        # {'model': PoissonTPP, 'learning_param_map': learning_param_map},
+        # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map},
+        # {'model': PoissonPolynomialFirstOrderTPP, 'learning_param_map': learning_param_map},
         # TODO: {'model': SelfCorrectingTPP, 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map}
+        # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map}
     ]
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
