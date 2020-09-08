@@ -151,3 +151,17 @@ def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler"):
     return loss1
 
 
+def predict(model, time, in_size, atribute=None):
+    model.eval()
+    time_len = time.size(1)
+    if atribute is None:
+        atribute = torch.ones(in_size).reshape(1, -1)*0
+    z = torch.zeros(time.shape)
+    z0 = model(atribute, time[0, 0])
+    z[:, 0] = z0
+    for i in range(time_len-1):
+        atribute = atribute + time[0, i+1]
+        z[:, i+1] = model(atribute, time[:, i+1])
+        atribute[:, 1:] = atribute[:, :-1].clone()
+        atribute[:, 0] = 0
+    return z

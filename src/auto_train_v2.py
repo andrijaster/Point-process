@@ -25,15 +25,15 @@ if __name__ == "__main__":
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 5
+    in_size = 100
     out_size = 1
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
+        # {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.01},
+        # {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.01},
+        # {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.01},
+        # {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
         {'model': GRUPointProcess, 'learning_param_map': learning_param_map},
@@ -83,5 +83,5 @@ if __name__ == "__main__":
 
     print(evaluation_df)
 
-    evaluation_df.to_csv(f"results/autoput_scores_040717_{str(learning_param_map[0]['learning_rate'])}.csv",
+    evaluation_df.to_csv(f"results/autoput_scores_040717_{str(learning_param_map[0]['learning_rate'])}_0.2.csv",
                          index=False)

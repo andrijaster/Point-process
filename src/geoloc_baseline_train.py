@@ -56,7 +56,7 @@ if __name__ == "__main__":
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
-    in_size = 5
+    in_size = 100
     out_size = 1
     no_epochs = 2000
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'training_time',
@@ -97,5 +97,5 @@ if __name__ == "__main__":
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"{project_dir}/results/zh_main_station_baselines_240820_{str(learning_param_map[0]['learning_rate'])}.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/zh_main_station_baselines_240820_{str(learning_param_map[0]['learning_rate'])}_0.2.csv",
                          index=False)

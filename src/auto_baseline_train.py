@@ -39,25 +39,24 @@ if __name__ == "__main__":
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
+        # {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
         {'model': HawkesTPP, 'learning_param_map': learning_param_map},
-        {'model': HawkesSumGaussianTPP, 'learning_param_map': learning_param_map}
-        # {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
-        # {'model': PoissonTPP, 'learning_param_map': learning_param_map},
+        {'model': HawkesSumGaussianTPP, 'learning_param_map': learning_param_map},
+        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
+        {'model': PoissonTPP, 'learning_param_map': learning_param_map}
         # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map},
         # {'model': PoissonPolynomialFirstOrderTPP, 'learning_param_map': learning_param_map},
-        # TODO: {'model': SelfCorrectingTPP, 'learning_param_map': learning_param_map},
-        # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map}
+        # TODO: {'model': SelfCorrectingTPP, 'learning_param_map': learning_param_map}
     ]
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
-    in_size = 5
+    in_size = 100
     out_size = 1
     no_epochs = 2000
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'training_time',
@@ -98,5 +97,5 @@ if __name__ == "__main__":
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"{project_dir}/results/autoput_baselines_scores_040717_{str(learning_param_map[0]['learning_rate'])}.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/autoput_baselines_scores_040717_{str(learning_param_map[0]['learning_rate'])}_0.2.csv",
                          index=False)

@@ -33,25 +33,24 @@ if __name__ == "__main__":
     test_data.loc[:, 'date1_ts'] = test_data.loc[:, 'date1_ts'] - test_data.loc[:, 'date1_ts'].min()
     train_time = torch.tensor(train_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data.date1_ts.values).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 5
+    in_size = 100
     out_size = 1
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
-        {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001}
+        # {'rule': 'Implicit Euler', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Trapezoid', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Simpsons', 'no_step': 10, 'learning_rate': 0.001},
+        # {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
         {'model': HawkesTPP, 'learning_param_map': learning_param_map},
-        {'model': HawkesSumGaussianTPP, 'learning_param_map': learning_param_map}
-         # {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
-         # {'model': PoissonTPP, 'learning_param_map': learning_param_map},
+        {'model': HawkesSumGaussianTPP, 'learning_param_map': learning_param_map},
+        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
+        {'model': PoissonTPP, 'learning_param_map': learning_param_map}
          # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map},
          # {'model': PoissonPolynomialFirstOrderTPP, 'learning_param_map': learning_param_map},
          # TODO: {'model': SelfCorrectingTPP, 'learning_param_map': learning_param_map},
-         # {'model': PoissonPolynomialTPP, 'learning_param_map': learning_param_map}
     ]
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
@@ -98,5 +97,5 @@ if __name__ == "__main__":
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
-    evaluation_df.to_csv(f"{project_dir}/results/ski_kg_2018_baselines_{str(learning_param_map[0]['learning_rate'])}_0.1.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/ski_kg_2018_baselines_{str(learning_param_map[0]['learning_rate'])}_0.2.csv",
                          index=False)
