@@ -94,7 +94,7 @@ def loss(z, integral):
 
 
 def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, h=None, no_epoch=100, log=1,
-        log_epoch=10, figpath='model.png'):
+        log_epoch=10, figpath=None):
     train_losses, test_losses = [], []
 
     init_loss = evaluate(model, train_time, in_size, no_steps=no_steps, h=h, method='Trapezoid').data.numpy().flatten()[0]
@@ -127,19 +127,20 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         if e % log_epoch == 0 and log == 1:
             print(f"Epoch: {e}, train loss: {train_loss.data.numpy().flatten()[0]}, "
                   f"test loss: {test_loss.data.numpy().flatten()[0]}")
-            plt.clf()
-            plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
-            plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
-            plt.legend(loc="upper right")
-            plt.show()
+            if figpath:
+                plt.clf()
+                plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
+                plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
+                plt.legend(loc="upper right")
+                plt.show()
 
-    # always draw final img
-    plt.clf()
-    plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
-    plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
-    plt.legend(loc="upper right")
-    plt.savefig(figpath)
-    plt.show()
+    if figpath:
+        plt.clf()
+        plt.plot(train_losses, color='skyblue', linewidth=2, label='train')
+        plt.plot(test_losses, color='darkgreen', linewidth=2, linestyle='dashed', label="test")
+        plt.legend(loc="upper right")
+        plt.savefig(figpath)
+        plt.show()
 
     return model
 
