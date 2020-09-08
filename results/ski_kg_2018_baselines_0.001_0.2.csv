@@ -1,0 +1,5 @@
+model_name,rule,no_step,epochs,learning_rate,training_time,nr_of_reinit,loss_on_train,loss_on_test
+HawkesTPP,Euler,10,2000,0.001,1090,1,6517.12255859375,4598.77685546875
+HawkesSumGaussianTPP,Euler,10,2000,0.001,2226,1,121417.8671875,63385.91015625
+FCNPointProcess,Euler,10,2000,0.001,1878,3,2644053.0,
+PoissonTPP,Euler,10,2000,0.001,607,1,4894.7001953125,4527.85693359375
