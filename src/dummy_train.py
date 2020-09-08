@@ -21,13 +21,17 @@ if __name__ == "__main__":
 
     # data = np.unique(np.sort(np.random.poisson(lam=(np.repeat(np.tile(np.arange(5), 50),20)+1)*100)))
     data = np.unique(np.sort(np.round(np.random.exponential(1.0,size=(1000,))*100)))
+    data = np.unique(np.sort(np.random.poisson(lam=(np.repeat(np.tile(np.arange(5), 50),20)+1)*100)))
+    sns.distplot(data.flatten())
+    plt.show()
 
     train_data = data[:200]
     test_data = data[200:]
     train_time = torch.tensor(train_data).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 100
+    in_size = 50
     out_size = 1
+    no_epochs = 200
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01},
@@ -44,9 +48,6 @@ if __name__ == "__main__":
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
-    in_size = 100
-    out_size = 1
-    no_epochs = 2000
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'training_time',
                                           'nr_of_reinit', 'loss_on_train', 'loss_on_test'])
 
