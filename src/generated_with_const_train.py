@@ -99,8 +99,8 @@ if __name__ == "__main__":
         {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': PoissonPolynomialFirstOrderTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
-        # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+        {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
         # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
