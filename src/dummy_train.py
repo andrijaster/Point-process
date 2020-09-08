@@ -19,12 +19,11 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
     project_dir = str(Path(__file__).parent.parent)
 
-    data = np.unique(np.sort(np.random.poisson(lam=(np.repeat(np.tile(np.arange(5), 50),20)+1)*100)))
-    sns.distplot(data.flatten())
-    plt.show()
+    # data = np.unique(np.sort(np.random.poisson(lam=(np.repeat(np.tile(np.arange(5), 50),20)+1)*100)))
+    data = np.unique(np.sort(np.round(np.random.exponential(1.0,size=(1000,))*100)))
 
-    train_data = data[:400]
-    test_data = data[400:]
+    train_data = data[:200]
+    test_data = data[200:]
     train_time = torch.tensor(train_data).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_data).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 100

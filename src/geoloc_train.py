@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
 
-    in_size = 100
+    in_size = 10
     out_size = 1
     no_epochs = 2000
     evaluation_df = pd.DataFrame(columns=['model_name', 'rule', 'no_step', 'learning_rate', 'training_time',

@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     data_folder = project_dir+'/data/geoloc/'
     dataset_path = 'zh_hb_main_station-24-25.082020.csv'  # os.environ["TRAINING_DATASET"]
-    model_filename = project_dir + '/models/autoput-2017-01-01/auto-2017-01-01-SelfCorrectingProcess-Euler.torch'
+    model_filename = project_dir + '/models/dummy/auto-2017-01-01-SelfCorrectingProcess-Euler.torch'
     data = pd.read_csv(data_folder+dataset_path)
     in_size = 5
 
