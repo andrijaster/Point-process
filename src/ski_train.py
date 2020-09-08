@@ -41,7 +41,6 @@ if __name__ == "__main__":
         # {'rule': 'Gaussian_Q', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-        {'model': FCNPointProcess, 'learning_param_map': learning_param_map},
         {'model': GRUPointProcess, 'learning_param_map': learning_param_map},
         {'model': LSTMPointProcess, 'learning_param_map': learning_param_map},
         {'model': RNNPointProcess, 'learning_param_map': learning_param_map}
