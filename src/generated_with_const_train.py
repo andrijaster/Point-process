@@ -49,7 +49,7 @@ def expectation_of_lambda_as_mean_of_interevents(interevent_time):
     return interevent_time.mean()
 
 
-def plot_results(model, train, test, l, figpath):
+def plot_results(model, train, test, predicted_lambdas, l, figpath):
     plt.clf()
     ax = plt.subplot("221")
     ax.set_title(f"[Train] Interevents l={l}", fontsize=10)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 100
     out_size = 1
-    no_epochs = 1000
+    no_epochs = 2000
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001}
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
                     predicted_lambdas = bb_train.predict(model, test_time, in_size)
 
-                    plot_results(model, train_interevents, test_interevents, l=l_generator,
+                    plot_results(model, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}.png")
                     model_filepath = f"{project_dir}/models/dummy/{model_name}.torch"
                     pickle.dump(model, open(model_filepath, 'wb'))

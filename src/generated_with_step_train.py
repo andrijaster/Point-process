@@ -19,12 +19,8 @@ from v2.PoissonPolynomialFirstOrderTPP import PoissonPolynomialFirstOrderTPP
 from v2.SelfCorrectingTPP import SelfCorrectingTPP
 from v2.HawkesSumGaussianTPP import HawkesSumGaussianTPP
 from v2.HawkesTPP import HawkesTPP
-
-def generate_process_with_exponential_interevent(first_event_time, lambda_gen=100, n_events=500):
-    event_time = [first_event_time]
-    for i in range(n_events):
-        event_time.append(event_time[-1] + round(np.random.exponential(lambda_gen)))
-    return event_time
+from generated_with_const_train import generate_process_with_exponential_interevent, get_interevents, \
+    expectation_of_lambda_per_second, expectation_of_lambda_as_mean_of_interevents, plot_results
 
 
 def generate_mixed_process_based_on_lambda(first_event_time, lambdas, n_events):
@@ -35,36 +31,6 @@ def generate_mixed_process_based_on_lambda(first_event_time, lambdas, n_events):
                                                                    n_events=n_events[i])
         events = events + events_part
     return events
-
-
-def get_interevents(events):
-    shift_right = events[:-1]
-    shift_right.insert(0, 0)
-    return np.array(events) - np.array(shift_right)
-
-
-def expectation_of_lambda_per_second(events):
-    return (events[-1] - events[0]) / len(events)
-
-
-def expectation_of_lambda_as_mean_of_interevents(interevent_time):
-    return interevent_time.mean()
-
-
-def plot_results(model, train, test, l, figpath):
-    plt.clf()
-    ax = plt.subplot("221")
-    ax.set_title(f"[Train] Interevents l={l}", fontsize=10)
-    ax.hist(train, density=True, bins=30)
-    ax = plt.subplot("222")
-    ax.set_title(f"[Test] Interevents l={l}", fontsize=10)
-    ax.hist(test, density=True, bins=30)
-    ax = plt.subplot("212")
-    ax.set_title(f"[{type(model).__name__}] Predicted lambda on test set", fontsize=10)
-    ax.scatter(test, predicted_lambdas.data.numpy().flatten(), s=0.5)
-    plt.tight_layout()
-    plt.savefig(figpath)
-    plt.show()
 
 
 if __name__ == "__main__":
@@ -91,7 +57,7 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 100
     out_size = 1
-    no_epochs = 1000
+    no_epochs = 2000
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001}
@@ -148,7 +114,7 @@ if __name__ == "__main__":
 
                     predicted_lambdas = bb_train.predict(model, test_time, in_size)
 
-                    plot_results(model, train_interevents, test_interevents, l=l_generator,
+                    plot_results(model, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}.png")
                     model_filepath = f"{project_dir}/models/dummy/{model_name}.torch"
                     pickle.dump(model, open(model_filepath, 'wb'))
