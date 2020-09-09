@@ -1,0 +1,4 @@
+model_name,rule,no_step,learning_rate,training_time,nr_of_reinit,loss_on_train,loss_on_test
+RNNPointProcess,Euler,3,0.01,22,1,46631.49609375,48432.5703125
+GRUPointProcess,Euler,3,0.01,31,1,44644.90234375,46281.4609375
+LSTMPointProcess,Euler,3,0.01,31,1,26308.611328125,27239.712890625

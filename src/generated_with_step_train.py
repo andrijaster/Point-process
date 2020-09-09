@@ -7,11 +7,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-from v2 import BaseTraining
 from v2.GRUPointProcess import GRUPointProcess
 from v2.LSTMPointProcess import LSTMPointProcess
 from v2.RNNPointProcess import RNNPointProcess
 from v2 import BaseBaselineTraining as bb_train
+from v2 import BaseTraining as bb_train
 from v2.FCNPointProcess import FCNPointProcess
 from v2.PoissonTPP import PoissonTPP
 from v2.PoissonPolynomialTPP import PoissonPolynomialTPP
@@ -56,9 +56,10 @@ if __name__ == "__main__":
 
     train_time = torch.tensor(train_events).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 50
+    in_size = 10
     out_size = 1
-    no_epochs = 2000
+    no_epochs = 2
+    farest_interevent = -1e9
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
@@ -73,7 +74,7 @@ if __name__ == "__main__":
         }]},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
-        # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
+        # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
@@ -103,11 +104,14 @@ if __name__ == "__main__":
                 t0 = time.time()
                 model = bb_train.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
                                      no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
-                                     figpath=f"{project_dir}/img/dummy/{model_name}_train_0.3.png")
+                                     figpath=f"{project_dir}/img/dummy/{model_name}_train_0.3.png",
+                                     farest_interevent=farest_interevent)
 
                 if model:
-                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method=params['rule'])
-                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid')
+                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method=params['rule'],
+                                                      farest_interevent=farest_interevent)
+                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid',
+                                                     farest_interevent=farest_interevent)
                     print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy().flatten()[0])}, "
                           f"loss on test: {str(loss_on_test.data.numpy().flatten()[0])}")
                     evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
@@ -119,7 +123,7 @@ if __name__ == "__main__":
                                                              loss_on_train.data.numpy().flatten()[0],
                                                              loss_on_test.data.numpy().flatten()[0]]
 
-                    predicted_lambdas = bb_train.predict(model, test_time, in_size)
+                    predicted_lambdas = bb_train.predict(model, test_time, in_size, farest_interevent=farest_interevent)
 
                     plot_results(model, test_time, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}_0.3.png")
@@ -128,6 +132,6 @@ if __name__ == "__main__":
 
     print(evaluation_df)
 
-    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_{str(learning_param_map[0]['learning_rate'])}_0.3.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_nn_{str(learning_param_map[0]['learning_rate'])}_0.3.csv",
                          index=False)
 

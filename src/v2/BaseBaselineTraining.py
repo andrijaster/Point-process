@@ -6,7 +6,7 @@ from scipy.special import p_roots
 import numpy as np
 
 
-def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Euler"):
+def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Euler", farest_interevent=-1e9):
 
     def integral_solve(z0, time_to_t0, t0, t1, atribute, no_steps=10, h=None, method="Euler"):
         if no_steps is not None:
@@ -73,7 +73,6 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
 
     integral_ = 0
     time_len = time.size(1)
-    farest_interevent = -1e9
     if atribute is None:
         atribute = torch.ones(in_size).reshape(1,-1)*farest_interevent
         atribute[:, 0] = 0
@@ -97,10 +96,11 @@ def loss(z, integral):
 
 
 def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, h=None, no_epoch=100, log=1,
-        log_epoch=10, figpath=None):
+        log_epoch=10, figpath=None, farest_interevent=-1e9):
     train_losses, test_losses = [], []
 
-    init_loss = evaluate(model, train_time, in_size, no_steps=no_steps, h=h, method='Trapezoid').data.numpy().flatten()[0]
+    init_loss = evaluate(model, train_time, in_size, no_steps=no_steps, h=h, method='Trapezoid',
+                         farest_interevent=farest_interevent).data.numpy().flatten()[0]
     if np.isnan(init_loss) or np.isinf(init_loss):
         print(f"Init loss: {init_loss}. It needs to reinitialize the model.")
         return None
@@ -116,9 +116,11 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         if method == "Analytical":
             z_, integral_ = model.integral_analytical(train_time)
         else:
-            z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method)
+            z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method,
+                                     farest_interevent=farest_interevent)
         train_loss = loss(z_, integral_)
         train_loss.backward()
+        # torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer_1.step()
 
         train_losses.append(train_loss.data.numpy().flatten()[0])
@@ -147,16 +149,15 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
     return model
 
 
-def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler"):
+def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler", farest_interevent=-1e9):
     model.eval()
-    z_, integral_ = integral(model, time, in_size, no_steps, h=h, method=method)
+    z_, integral_ = integral(model, time, in_size, no_steps, h=h, method=method, farest_interevent=farest_interevent)
     loss1 = loss(z_, integral_)
     return loss1
 
 
-def predict(model, time, in_size, atribute=None):
+def predict(model, time, in_size, atribute=None, farest_interevent=-1e9):
     model.eval()
-    farest_interevent = -1e9
     time_len = time.size(1)
     if atribute is None:
         atribute = torch.ones(in_size).reshape(1, -1) * farest_interevent
