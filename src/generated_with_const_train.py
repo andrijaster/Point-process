@@ -14,8 +14,7 @@ from v2 import BaseBaselineTraining as bb_train
 from v2.FCNPointProcess import FCNPointProcess
 from v2.PoissonTPP import PoissonTPP
 from v2.PoissonPolynomialTPP import PoissonPolynomialTPP
-from v2.PoissonPolynomialFirstOrderTPP import PoissonPolynomialFirstOrderTPP
-from v2.SelfCorrectingTPP import SelfCorrectingTPP
+from v2.IntereventRegressorTPP import IntereventRegressorTPP
 from v2.HawkesSumGaussianTPP import HawkesSumGaussianTPP
 from v2.HawkesTPP import HawkesTPP
 
@@ -51,17 +50,17 @@ def expectation_of_lambda_as_mean_of_interevents(interevent_time):
     return interevent_time.mean()
 
 
-def plot_results(model, train, test, predicted_lambdas, l, figpath):
+def plot_results(model, input_sequence, train_iv, test_iv, predicted_lambdas, l, figpath):
     plt.clf()
     ax = plt.subplot("221")
     ax.set_title(f"[Train] Interevents l={l}", fontsize=10)
-    ax.hist(train, density=True, bins=30)
+    ax.hist(train_iv, density=True, bins=30)
     ax = plt.subplot("222")
     ax.set_title(f"[Test] Interevents l={l}", fontsize=10)
-    ax.hist(test, density=True, bins=30)
+    ax.hist(test_iv, density=True, bins=30)
     ax = plt.subplot("212")
     ax.set_title(f"[{type(model).__name__}] Predicted lambda on test set", fontsize=10)
-    ax.scatter(test, predicted_lambdas.data.numpy().flatten(), s=0.5)
+    ax.scatter(input_sequence, predicted_lambdas.data.numpy().flatten(), s=0.5)
     plt.tight_layout()
     plt.savefig(figpath)
     plt.show()
@@ -89,20 +88,20 @@ if __name__ == "__main__":
 
     train_time = torch.tensor(train_events).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 100
+    in_size = 50
     out_size = 1
-    no_epochs = 2000
+    no_epochs = 1000
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001}
+        {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
         {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        # {'model': PoissonPolynomialFirstOrderTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        {'model': IntereventRegressorTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
+        {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
+        # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
         # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
@@ -133,8 +132,8 @@ if __name__ == "__main__":
                                      figpath=f"{project_dir}/img/dummy/{model_name}_train.png")
 
                 if model:
-                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method=params['rule'])
-                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid')
+                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method='Trapezoid', no_steps=3)
+                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid', no_steps=3)
                     print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy().flatten()[0])}, "
                           f"loss on test: {str(loss_on_test.data.numpy().flatten()[0])}")
                     evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
@@ -148,7 +147,7 @@ if __name__ == "__main__":
 
                     predicted_lambdas = bb_train.predict(model, test_time, in_size)
 
-                    plot_results(model, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
+                    plot_results(model, test_time, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}.png")
                     model_filepath = f"{project_dir}/models/dummy/{model_name}.torch"
                     pickle.dump(model, open(model_filepath, 'wb'))

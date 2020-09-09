@@ -7,4 +7,5 @@ from .PoissonPolynomialFirstOrderTPP import PoissonPolynomialFirstOrderTPP
 from .SelfCorrectingTPP import SelfCorrectingTPP
 from .HawkesSumGaussianTPP import HawkesSumGaussianTPP
 from .HawkesTPP import HawkesTPP
+from .IntereventRegressorTPP import IntereventRegressorTPP
 
