@@ -1,0 +1,5 @@
+model_name,rule,no_step,learning_rate,training_time,nr_of_reinit,loss_on_train,loss_on_test
+PoissonTPP,Euler,10,0.001,2107,1,8378.2109375,8336.13671875
+PoissonPolynomialTPP,Euler,10,0.001,4269,1,72272429056.0,70077202432.0
+HawkesTPP,Euler,10,0.001,4244,1,8591.294921875,8439.1171875
+HawkesSumGaussianTPP,Euler,10,0.001,8593,1,126225.71875,65562.2578125
