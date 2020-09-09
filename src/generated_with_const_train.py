@@ -90,15 +90,19 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 50
     out_size = 1
-    no_epochs = 1000
+    no_epochs = 2000
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.001}
+        {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
         {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': IntereventRegressorTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
+            'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+        }]},
+        {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
+            'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+        }]},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
         # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
@@ -121,15 +125,17 @@ if __name__ == "__main__":
                 counter += 1
                 if model_definition['type'] == 'nn':
                     model = model_definition['model'](in_size+1, out_size)
+                elif model_definition['type'] == 'ir':
+                    model = model_definition['model'](in_size, out_size)
                 else:
                     model = model_definition['model']()
-                model_name = f"generated_exp-{type(model).__name__}-{params['learning_rate']}-{l_generator}"
+                model_name = f"generated_exp-{type(model).__name__}-{params['learning_rate']}-{l_generator}_0.3"
 
                 print(f"{counter}. Starting to train a model: {model_name}")
                 t0 = time.time()
                 model = bb_train.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
                                      no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
-                                     figpath=f"{project_dir}/img/dummy/{model_name}_train.png")
+                                     figpath=f"{project_dir}/img/dummy/{model_name}_train_0.3.png")
 
                 if model:
                     loss_on_train = bb_train.evaluate(model, train_time, in_size, method='Trapezoid', no_steps=3)
@@ -148,12 +154,12 @@ if __name__ == "__main__":
                     predicted_lambdas = bb_train.predict(model, test_time, in_size)
 
                     plot_results(model, test_time, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
-                                 figpath=f"{project_dir}/img/dummy/{model_name}.png")
-                    model_filepath = f"{project_dir}/models/dummy/{model_name}.torch"
+                                 figpath=f"{project_dir}/img/dummy/{model_name}_0.3.png")
+                    model_filepath = f"{project_dir}/models/dummy/{model_name}_0.3.torch"
                     pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
 
-    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_{str(learning_param_map[0]['learning_rate'])}_0.1.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_{str(learning_param_map[0]['learning_rate'])}_0.3.csv",
                          index=False)
 

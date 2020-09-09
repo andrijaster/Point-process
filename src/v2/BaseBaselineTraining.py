@@ -73,7 +73,7 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
 
     integral_ = 0
     time_len = time.size(1)
-    farest_interevent = time[0, -1, 0] - time[0, 0, 0]
+    farest_interevent = -1e9
     if atribute is None:
         atribute = torch.ones(in_size).reshape(1,-1)*farest_interevent
         atribute[:, 0] = 0
@@ -156,7 +156,7 @@ def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler"):
 
 def predict(model, time, in_size, atribute=None):
     model.eval()
-    farest_interevent = time[0, -1, 0] - time[0, 0, 0]
+    farest_interevent = -1e9
     time_len = time.size(1)
     if atribute is None:
         atribute = torch.ones(in_size).reshape(1, -1) * farest_interevent
