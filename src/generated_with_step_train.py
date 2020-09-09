@@ -40,14 +40,14 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
     project_dir = str(Path(__file__).parent.parent)
 
-    l_generator = (50, 200, 50)
-    train_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    l_generator = (50, 200)
+    train_events = generate_mixed_process_based_on_lambda(0, l_generator, (300, 500))
     train_interevents = get_interevents(train_events)
     print(f"[Train] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(train_events)}"
           f"\t2.) {expectation_of_lambda_as_mean_of_interevents(train_interevents)}")
 
-    test_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    test_events = generate_mixed_process_based_on_lambda(0, l_generator, (300, 500))
     test_interevents = get_interevents(test_events)
     print(f"[Test] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(test_events)}"
@@ -57,17 +57,17 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 100
     out_size = 1
-    no_epochs = 2000
+    no_epochs = 1000
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
         {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        # {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': PoissonPolynomialFirstOrderTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        # {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}
         # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
@@ -117,10 +117,10 @@ if __name__ == "__main__":
                     plot_results(model, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}.png")
                     model_filepath = f"{project_dir}/models/dummy/{model_name}.torch"
-                    pickle.dump(model, open(model_filepath, 'wb'))
+                    # pickle.dump(model, open(model_filepath, 'wb'))
 
     print(evaluation_df)
 
-    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_{str(learning_param_map[0]['learning_rate'])}_0.1.csv",
-                         index=False)
+    # evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_{str(learning_param_map[0]['learning_rate'])}_0.1.csv",
+    #                      index=False)
 

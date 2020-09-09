@@ -19,6 +19,7 @@ from v2.SelfCorrectingTPP import SelfCorrectingTPP
 from v2.HawkesSumGaussianTPP import HawkesSumGaussianTPP
 from v2.HawkesTPP import HawkesTPP
 
+
 def generate_process_with_exponential_interevent(first_event_time, lambda_gen=100, n_events=500):
     event_time = [first_event_time]
     for i in range(n_events):
@@ -34,6 +35,7 @@ def generate_mixed_process_based_on_lambda(first_event_time, lambdas, n_events):
                                                                    n_events=n_events[i])
         events = events + events_part
     return events
+
 
 def get_interevents(events):
     shift_right = events[:-1]
