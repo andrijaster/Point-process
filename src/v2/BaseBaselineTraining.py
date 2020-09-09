@@ -116,7 +116,7 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
             z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method)
         train_loss = loss(z_, integral_)
         train_loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+        # torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer_1.step()
 
         train_losses.append(train_loss.data.numpy().flatten()[0])
