@@ -30,7 +30,7 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
             for _ in range(no_steps):
                 integral += z0*h_max
                 t = t + h_max
-                atribute = atribute + h_max
+                # atribute = atribute + h_max
                 z0 = model(atribute, t)
 
         if method == "Implicit_Euler":
@@ -43,7 +43,7 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
         if method == "Trapezoid":
             for _ in range(no_steps):
                 t = t + h_max
-                atribute = atribute + h_max
+                # atribute = atribute + h_max
                 z1 = model(atribute, t)
                 integral += (z0+z1)*0.5*h_max
                 z0 = z1
@@ -73,17 +73,20 @@ def integral(model, time, in_size, no_steps, h=None, atribute=None, method="Eule
 
     integral_ = 0
     time_len = time.size(1)
+    farest_interevent = time[0, -1, 0] - time[0, 0, 0]
     if atribute is None:
-        atribute = torch.ones(in_size).reshape(1,-1)*0
+        atribute = torch.ones(in_size).reshape(1,-1)*farest_interevent
+        atribute[:, 0] = 0
     z = torch.zeros(time.shape)
     z0 = model(atribute, time[0, 0])
     z[:,0] = z0
     for i in range(time_len-1):
+        start_index = i-in_size+1 if i-in_size+1 >= 0 else 0
+        atribute[0, :i+1] = time[0, start_index:i+1, 0]
+        z[:, i+1] = model(atribute, time[:, i+1])
         integral_interval, z_, atribute = integral_solve(z0, time[0, :i], time[0, i], time[0, i+1],
                                                          atribute, no_steps=no_steps, h=h, method=method)
         integral_ += integral_interval
-        atribute[:, 1:] = atribute[:, :-1].clone()
-        atribute[:, 0] = 0
         z[:, i+1] = z_
     return z, integral_
 
@@ -116,7 +119,6 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
             z_, integral_ = integral(model, train_time, in_size, no_steps=no_steps, h=h, method=method)
         train_loss = loss(z_, integral_)
         train_loss.backward()
-        # torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
         optimizer_1.step()
 
         train_losses.append(train_loss.data.numpy().flatten()[0])
@@ -154,15 +156,16 @@ def evaluate(model, time, in_size, no_steps=10, h=None, method="Euler"):
 
 def predict(model, time, in_size, atribute=None):
     model.eval()
+    farest_interevent = time[0, -1, 0] - time[0, 0, 0]
     time_len = time.size(1)
     if atribute is None:
-        atribute = torch.ones(in_size).reshape(1, -1)*0
+        atribute = torch.ones(in_size).reshape(1, -1) * farest_interevent
+        atribute[:, 0] = 0
     z = torch.zeros(time.shape)
     z0 = model(atribute, time[0, 0])
     z[:, 0] = z0
     for i in range(time_len-1):
-        atribute = atribute + time[0, i+1]
+        start_index = i-in_size+1 if i-in_size+1 >= 0 else 0
+        atribute[0, :i+1] = time[0, start_index:i+1, 0]
         z[:, i+1] = model(atribute, time[:, i+1])
-        atribute[:, 1:] = atribute[:, :-1].clone()
-        atribute[:, 0] = 0
     return z
