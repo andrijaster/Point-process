@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     train_time = torch.tensor(train_events).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 50
+    in_size = 10
     out_size = 1
     no_epochs = 1000
 
@@ -96,8 +96,8 @@ if __name__ == "__main__":
         {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.001}
     ]
     models_to_evaluate = [
-        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+#        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+#        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': IntereventRegressorTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
