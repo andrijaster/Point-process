@@ -58,21 +58,12 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 10
     out_size = 1
-    no_epochs = 2000
+    no_epochs = 1000
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-<<<<<<< HEAD
-        #{'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        #{'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': IntereventRegressorTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-||||||| merged common ancestors
-        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': IntereventRegressorTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-=======
         {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
@@ -80,7 +71,6 @@ if __name__ == "__main__":
         {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
         }]},
->>>>>>> 9500ed46c64b5f439f6fe2c71a8ac945f64967b7
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
         # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map}

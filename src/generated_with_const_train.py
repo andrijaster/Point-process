@@ -90,7 +90,7 @@ if __name__ == "__main__":
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
     in_size = 10
     out_size = 1
-    no_epochs = 2000
+    no_epochs = 1000
 
     learning_param_map = [
         {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
