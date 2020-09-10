@@ -1,4 +1,5 @@
 model_name,rule,no_step,learning_rate,training_time,nr_of_reinit,loss_on_train,loss_on_test
-RNNPointProcess,Euler,3,0.01,22,1,46631.49609375,48432.5703125
-GRUPointProcess,Euler,3,0.01,31,1,44644.90234375,46281.4609375
-LSTMPointProcess,Euler,3,0.01,31,1,26308.611328125,27239.712890625
+PoissonTPP,Euler,3,0.01,2513,1,6859.818359375,6877.51708984375
+PoissonPolynomialTPP,Euler,3,0.1,4329,1,27555969024.0,30129844224.0
+IntereventRegressorTPP,Euler,3,0.1,3841,1,660539899904.0,345129713664.0
+HawkesTPP,Euler,3,0.01,5496,3,6869.580078125,6879.6796875

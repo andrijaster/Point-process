@@ -96,14 +96,14 @@ if __name__ == "__main__":
         {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-        # {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        # {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
-        #     'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
-        # }]},
-        # {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
-        #     'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
-        # }]},
-        # {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
+             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+        }]},
+        {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
+             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+         }]},
+        {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
         # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
