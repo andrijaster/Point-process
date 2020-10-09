@@ -11,7 +11,7 @@ from v2.GRUPointProcess import GRUPointProcess
 from v2.LSTMPointProcess import LSTMPointProcess
 from v2.RNNPointProcess import RNNPointProcess
 from v2 import BaseBaselineTraining as bb_train
-# from v2 import BaseTraining as bb_train
+from v2 import BaseTraining as b_train
 from v2.FCNPointProcess import FCNPointProcess
 from v2.PoissonTPP import PoissonTPP
 from v2.PoissonPolynomialTPP import PoissonPolynomialTPP
@@ -41,14 +41,16 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
     project_dir = str(Path(__file__).parent.parent)
 
-    l_generator = (50, 5, 50)
-    train_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    l_generator = (1, 10, 100, 1000, 1000000)
+    num_of_events = (1000, 1000, 1000, 1000, 1000)
+    train_events = generate_mixed_process_based_on_lambda(0, l_generator, num_of_events)
     train_interevents = get_interevents(train_events)
+
     print(f"[Train] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(train_events)}"
           f"\t2.) {expectation_of_lambda_as_mean_of_interevents(train_interevents)}")
 
-    test_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    test_events = generate_mixed_process_based_on_lambda(0, l_generator, num_of_events)
     test_interevents = get_interevents(test_events)
     print(f"[Test] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(test_events)}"
@@ -59,23 +61,23 @@ if __name__ == "__main__":
     in_size = 10
     out_size = 1
 
-    farest_interevent = -1e9
+    farest_interevent = 0
     no_epochs = 2000
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.01}
+        {'rule': 'Euler', 'no_step': 5, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
         {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
-        {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
-             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
-        }]},
+        # {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
+        #     'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+        # }]},
         {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
             'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
         }]},
         {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
-        # {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+        {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
@@ -95,24 +97,27 @@ if __name__ == "__main__":
                 counter += 1
                 if model_definition['type'] == 'nn':
                     model = model_definition['model'](in_size+1, out_size)
+                    train = b_train
                 elif model_definition['type'] == 'ir':
                     model = model_definition['model'](in_size, out_size)
+                    train = b_train
                 else:
                     model = model_definition['model']()
+                    train = bb_train
                 model_name = f"generated_exp_step-{type(model).__name__}-{params['learning_rate']}-{l_generator}_0.3"
 
                 print(f"{counter}. Starting to train a model: {model_name}")
                 t0 = time.time()
-                model = bb_train.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
-                                     no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
-                                     figpath=f"{project_dir}/img/dummy/{model_name}_train_0.3.png",
-                                     farest_interevent=farest_interevent)
+                model = train.fit(model, train_time, test_time, in_size, lr=params['learning_rate'],
+                                  no_epoch=no_epochs, no_steps=params['no_step'], method=params['rule'], log_epoch=10,
+                                  figpath=f"{project_dir}/img/dummy/{model_name}_train_0.3.png",
+                                  farest_interevent=farest_interevent)
 
                 if model:
-                    loss_on_train = bb_train.evaluate(model, train_time, in_size, method=params['rule'],
-                                                      farest_interevent=farest_interevent)
-                    loss_on_test = bb_train.evaluate(model, test_time, in_size, method='Trapezoid',
-                                                     farest_interevent=farest_interevent)
+                    loss_on_train = train.evaluate(model, train_time, in_size, method=params['rule'],
+                                                   farest_interevent=farest_interevent)
+                    loss_on_test = train.evaluate(model, test_time, in_size, method='Trapezoid',
+                                                  farest_interevent=farest_interevent)
                     print(f"Model: {model_name}. Loss on train: {str(loss_on_train.data.numpy().flatten()[0])}, "
                           f"loss on test: {str(loss_on_test.data.numpy().flatten()[0])}")
                     evaluation_df.loc[len(evaluation_df)] = [type(model).__name__,
@@ -124,7 +129,7 @@ if __name__ == "__main__":
                                                              loss_on_train.data.numpy().flatten()[0],
                                                              loss_on_test.data.numpy().flatten()[0]]
 
-                    predicted_lambdas = bb_train.predict(model, test_time, in_size, farest_interevent=farest_interevent)
+                    predicted_lambdas = train.predict(model, test_time, in_size, farest_interevent=farest_interevent)
 
                     plot_results(model, test_time, train_interevents, test_interevents, predicted_lambdas, l=l_generator,
                                  figpath=f"{project_dir}/img/dummy/{model_name}_0.3.png")
