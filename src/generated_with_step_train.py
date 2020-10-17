@@ -68,19 +68,19 @@ if __name__ == "__main__":
         {'rule': 'Euler', 'no_step': 5, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+#        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
         #     'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
         # }]},
-        {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
-            'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
-        }]},
-        {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+#        {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
+#            'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+#        }]},
+#        {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
-        {'model': FCNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
-        # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+#        {'model': FCNPointProcess, 'type': 'fcn', 'learning_param_map': learning_param_map},
+        #{'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
-        # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+        {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
     ]
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
@@ -98,9 +98,9 @@ if __name__ == "__main__":
                 if model_definition['type'] == 'nn':
                     model = model_definition['model'](in_size+1, out_size)
                     train = b_train
-                elif model_definition['type'] == 'ir':
-                    model = model_definition['model'](in_size, out_size)
-                    train = b_train
+                elif model_definition['type'] == 'fcn':
+                    model = model_definition['model'](in_size+1, out_size)
+                    train = bb_train
                 else:
                     model = model_definition['model']()
                     train = bb_train
@@ -138,6 +138,6 @@ if __name__ == "__main__":
 
     print(evaluation_df)
 
-    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_nn_{str(learning_param_map[0]['learning_rate'])}_0.3.csv",
+    evaluation_df.to_csv(f"{project_dir}/results/generated_exp_step_lstm_{str(learning_param_map[0]['learning_rate'])}_0.3.csv",
                          index=False)
 

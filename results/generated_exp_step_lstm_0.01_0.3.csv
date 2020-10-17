@@ -1,0 +1,2 @@
+model_name,rule,no_step,learning_rate,training_time,nr_of_reinit,loss_on_train,loss_on_test
+LSTMPointProcess,Euler,5,0.01,92491,1,66023.75,66135.65625
