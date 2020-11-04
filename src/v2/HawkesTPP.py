@@ -4,8 +4,8 @@ import torch
 class HawkesTPP(torch.nn.Module):
     def __init__(self):
         super(HawkesTPP, self).__init__()
-        self.alpha = torch.ones(1, requires_grad=True) # todo: init alpha=0 nn.parameter
-        self.mu = torch.ones(1, requires_grad=True) # todo: init mu=10 nn.parameter
+        self.alpha = torch.nn.parameter.Parameter(torch.ones(1)*0.0, requires_grad=True)
+        self.mu = torch.nn.parameter.Parameter(torch.ones(1)*10.0, requires_grad=True)
         # self.power = torch.zeros(1, requires_grad=False)
 
     def forward(self, x, t):
