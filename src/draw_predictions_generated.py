@@ -18,14 +18,15 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
     project_dir = str(Path(__file__).parent.parent)
 
-    l_generator = (50, 5, 50)
-    train_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    l_generator = (1, 10, 100, 1000, 1000000)
+    num_of_events = (1000, 1000, 1000, 1000, 1000)
+    train_events = generate_mixed_process_based_on_lambda(0, l_generator, num_of_events)
     train_interevents = get_interevents(train_events)
     print(f"[Train] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(train_events)}"
           f"\t2.) {expectation_of_lambda_as_mean_of_interevents(train_interevents)}")
 
-    test_events = generate_mixed_process_based_on_lambda(0, l_generator, (500, 500, 500))
+    test_events = generate_mixed_process_based_on_lambda(0, l_generator, num_of_events)
     test_interevents = get_interevents(test_events)
     print(f"[Test] Lambda used for generator: {l_generator}. Empirical lambda from sequence: "
           f"1.) {expectation_of_lambda_per_second(test_events)}"
@@ -33,10 +34,10 @@ if __name__ == "__main__":
 
     train_time = torch.tensor(train_events).type('torch.FloatTensor').reshape(1, -1, 1)
     test_time = torch.tensor(test_events).type('torch.FloatTensor').reshape(1, -1, 1)
-    in_size = 100
+    in_size = 10
     out_size = 1
 
-    model_filename = project_dir + "/models/dummy/generated_exp_step-HawkesTPP-0.01-(50, 5, 50).torch"
+    model_filename = project_dir + "/models/dummy/generated_exp_step-HawkesTPP-0.01-(1, 10, 100, 1000, 1000000)_0.3_0.3.torch"
     loaded_model = pickle.load(open(model_filename, 'rb'))
     loss_on_test = b_train.evaluate(loaded_model, test_time, in_size, method='Trapezoid')
 

@@ -112,6 +112,8 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
     optimizer_1 = torch.optim.Adam(list_1, lr=lr)
 
     for e in range(no_epoch):
+        model.train()
+
         optimizer_1.zero_grad()
         if method == "Analytical":
             z_, integral_ = model.integral_analytical(train_time)
@@ -126,9 +128,10 @@ def fit(model, train_time, test_time, in_size, lr, method="Euler", no_steps=10, 
         train_losses.append(train_loss.data.numpy().flatten()[0])
         test_loss = evaluate(model, test_time, in_size, no_steps=no_steps, h=h, method='Trapezoid')
         test_losses.append(test_loss.data.numpy().flatten()[0])
-        model.train()
 
         if e % log_epoch == 0 and log == 1:
+            print(model.mu, model.alpha)
+            print(f"lambda: {z_}")
             print(f"Epoch: {e}, train loss: {train_loss.data.numpy().flatten()[0]}, "
                   f"test loss: {test_loss.data.numpy().flatten()[0]}")
             if figpath:

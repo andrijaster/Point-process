@@ -41,8 +41,10 @@ if __name__ == "__main__":
     pd.set_option('display.width', 1000)
     project_dir = str(Path(__file__).parent.parent)
 
-    l_generator = (1, 10, 100, 1000, 1000000)
-    num_of_events = (1000, 1000, 1000, 1000, 1000)
+    # l_generator = (1, 10, 100, 1000, 1000000)
+    # num_of_events = (10, 10, 10, 10, 10)
+    l_generator = (0.1, 0.1)
+    num_of_events = (25, 25)
     train_events = generate_mixed_process_based_on_lambda(0, l_generator, num_of_events)
     train_interevents = get_interevents(train_events)
 
@@ -62,25 +64,25 @@ if __name__ == "__main__":
     out_size = 1
 
     farest_interevent = 0
-    no_epochs = 2000
+    no_epochs = 500
 
     learning_param_map = [
-        {'rule': 'Euler', 'no_step': 5, 'learning_rate': 0.01}
+        {'rule': 'Euler', 'no_step': 10, 'learning_rate': 0.01}
     ]
     models_to_evaluate = [
-#        {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        # {'model': PoissonTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': PoissonPolynomialTPP, 'type': 'baseline', 'learning_param_map': [{
         #     'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
         # }]},
-#        {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
-#            'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
-#        }]},
-#        {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
+        # {'model': IntereventRegressorTPP, 'type': 'ir', 'learning_param_map': [{
+        #    'rule': 'Euler', 'no_step': 3, 'learning_rate': 0.1
+        # }]},
+        {'model': HawkesTPP, 'type': 'baseline', 'learning_param_map': learning_param_map},
         # {'model': HawkesSumGaussianTPP, 'type': 'baseline', 'learning_param_map': learning_param_map}
-#        {'model': FCNPointProcess, 'type': 'fcn', 'learning_param_map': learning_param_map},
-        #{'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+        # {'model': FCNPointProcess, 'type': 'fcn', 'learning_param_map': learning_param_map},
+        # {'model': RNNPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
         # {'model': GRUPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
-        {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
+        # {'model': LSTMPointProcess, 'type': 'nn', 'learning_param_map': learning_param_map},
     ]
     print(f'Train size: {str(train_time.shape[1])}, test size: {str(test_time.shape[1])} ('
           f'{round((test_time.shape[1] / (train_time.shape[1] + test_time.shape[1])), 2)} %).')
